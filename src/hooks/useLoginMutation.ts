@@ -34,6 +34,10 @@ export const useLogoutMutation = () => {
       // Set the query data directly to indicate not authenticated
       // This prevents a refetch that would fail with 401
       queryClient.setQueryData(['userStatus'], { success: false });
+
+      // Clear all Pokemon-related queries to ensure fresh data after login
+      queryClient.removeQueries({ queryKey: ['pokemonList'] });
+      queryClient.removeQueries({ queryKey: ['pokemon'] });
     },
   });
 };

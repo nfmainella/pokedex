@@ -8,8 +8,8 @@ import ProtectedPageClient from './ProtectedPageClient';
  */
 export default async function HomePage() {
   // Server-side auth check - redirects to login if not authenticated
-  const user = await requireAuth();
+  await requireAuth();
 
   // Pass user data to client component
-  return <ProtectedPageClient user={user} />;
+  return <ProtectedPageClient />;
 }

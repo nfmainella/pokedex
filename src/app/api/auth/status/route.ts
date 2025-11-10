@@ -1,42 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+import { jwtVerify } from 'jose';
 
 /**
- * Proxy route for /api/status
- * Forwards the request to the backend with cookies
+ * GET /api/auth/status
+ * Returns the authentication status of the current user
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get all cookies from the request
-    const cookieHeader = request.headers.get('cookie') || '';
+    // Get the token from cookies
+    const token = request.cookies.get('auth_token')?.value;
 
-    // Forward the request to the backend
-    const response = await fetch(`${BACKEND_URL}/api/status`, {
-      method: 'GET',
-      headers: {
-        Cookie: cookieHeader,
-      },
-      credentials: 'include',
-    });
+    if (!token) {
+      return NextResponse.json({ success: false });
+    }
 
-    const data = await response.json();
+    try {
+      // Verify the JWT token using jose
+      const secret = new TextEncoder().encode(
+        process.env.JWT_SECRET || 'your-secret-key'
+      );
+      const decoded = await jwtVerify(token, secret);
 
-    // Create a new response with the backend's data
-    const nextResponse = NextResponse.json(data, {
-      status: response.status,
-    });
-
-    // Forward any Set-Cookie headers from the backend
-    response.headers.forEach((value, key) => {
-      if (key.toLowerCase() === 'set-cookie') {
-        nextResponse.headers.append('set-cookie', value);
-      }
-    });
-
-    return nextResponse;
+      return NextResponse.json({
+        success: true,
+        username: (decoded.payload as { username: string }).username,
+      });
+    } catch {
+      // Token is invalid or expired
+      return NextResponse.json({ success: false });
+    }
   } catch (error) {
-    console.error('Error proxying status request:', error);
+    console.error('Error checking auth status:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

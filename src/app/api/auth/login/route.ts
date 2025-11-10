@@ -1,43 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+import { SignJWT } from 'jose';
 
 /**
- * Proxy route for /api/login
- * Forwards the request to the backend
+ * POST /api/auth/login
+ * Authenticates user with credentials and returns a JWT token
+ *
+ * Body:
+ * - username: string
+ * - password: string
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const cookieHeader = request.headers.get('cookie') || '';
+    const { username, password } = (await request.json()) as {
+      username?: string;
+      password?: string;
+    };
 
-    const response = await fetch(`${BACKEND_URL}/api/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Cookie: cookieHeader,
-      },
-      credentials: 'include',
-      body: JSON.stringify(body),
-    });
+    // Validate credentials (hardcoded for this exercise: admin/admin)
+    if (username === 'admin' && password === 'admin') {
+      // Generate JWT token using jose
+      const secret = new TextEncoder().encode(
+        process.env.JWT_SECRET || 'your-secret-key'
+      );
+      const token = await new SignJWT({ username: 'admin' })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setExpirationTime('24h')
+        .sign(secret);
 
-    const data = await response.json();
+      // Create response
+      const response = NextResponse.json({ message: 'Login successful' });
 
-    // Create a new response with the backend's data
-    const nextResponse = NextResponse.json(data, {
-      status: response.status,
-    });
+      // Set auth token cookie
+      response.cookies.set('auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+        maxAge: 24 * 60 * 60, // 24 hours in seconds
+        path: '/',
+      });
 
-    // Forward any Set-Cookie headers from the backend (important for auth_token)
-    response.headers.forEach((value, key) => {
-      if (key.toLowerCase() === 'set-cookie') {
-        nextResponse.headers.append('set-cookie', value);
-      }
-    });
+      return response;
+    }
 
-    return nextResponse;
+    return NextResponse.json(
+      { error: 'Invalid credentials' },
+      { status: 401 }
+    );
   } catch (error) {
-    console.error('Error proxying login request:', error);
+    console.error('Error during login:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
