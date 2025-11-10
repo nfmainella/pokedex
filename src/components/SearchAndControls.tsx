@@ -122,7 +122,9 @@ export function SearchAndControls({
   useEffect(() => {
     // Only sync if the input is not currently focused
     if (inputRef.current !== document.activeElement) {
-      setSearchValue(initialSearch);
+      setTimeout(() => {
+        setSearchValue(initialSearch);
+      }, 0);
     }
   }, [initialSearch]);
 
@@ -267,13 +269,13 @@ export function SearchAndControls({
             className="absolute top-full right-0 mt-2 flex flex-col w-[148px] z-50"
           >
             {/* Frame 54 - Red Header */}
-            <div className="flex flex-row items-start px-5 py-4 bg-primary rounded-t-lg">
+            <div className="flex flex-row items-start px-5 py-4 bg-[#DC0A2D] rounded-t-lg">
               <span className="text-xs font-bold leading-4 text-white">
                 Sort by:
               </span>
             </div>
 
-            <div className="flex flex-col items-start px-5 py-4 gap-4 bg-white rounded-b-lg shadow-inner-default border-4 border-primary">
+            <div className="flex flex-col items-start px-5 py-4 gap-4 bg-white rounded-b-lg shadow-inner-default border-4 border-[#DC0A2D]">
               {/* Radio Button: Number */}
               <label
                 className="flex flex-row items-center gap-2 w-full cursor-pointer"

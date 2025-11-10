@@ -36,7 +36,7 @@ export function PokemonDetailScreen({ id }: { id: number | string }) {
           <p className="text-gray-600">Error loading Pokémon</p>
           <button
             onClick={() => router.back()}
-            className="px-4 py-2 bg-primary text-white rounded-lg"
+            className="px-4 py-2 bg-[#DC0A2D] text-white rounded-lg"
           >
             Go Back
           </button>

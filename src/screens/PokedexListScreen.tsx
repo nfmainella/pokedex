@@ -78,7 +78,7 @@ export function PokedexListScreen() {
   // Loading state - show spinning Pokeball
   if (isLoading) {
     return (
-      <div className="w-full h-screen bg-primary p-1 flex items-center justify-center">
+      <div className="w-full h-screen bg-[#DC0A2D] p-1 flex items-center justify-center">
         <div className="animate-spin">
           <Icon name="pokeball" size={48} color="rgb(255, 255, 255)" />
         </div>
@@ -89,7 +89,7 @@ export function PokedexListScreen() {
   // Error state
   if (isError) {
     return (
-      <div className="w-full h-screen bg-primary p-1 flex items-center justify-center">
+      <div className="w-full h-screen bg-[#DC0A2D] p-1 flex items-center justify-center">
         <div className="bg-white rounded-lg p-6 shadow-lg max-w-md mx-4">
           <p className="text-center text-gray-900 font-medium">
             Failed to load Pokémon list. Please try again later.
@@ -105,7 +105,7 @@ export function PokedexListScreen() {
   }
 
   return (
-    <div className="w-full h-screen bg-primary p-1 flex flex-col isolate overflow-hidden">
+    <div className="w-full h-screen bg-[#DC0A2D] p-1 flex flex-col isolate overflow-hidden">
       {/* Header Section (Frame 29) */}
       <div className="flex flex-col items-start px-4 sm:px-6 md:px-8 pt-4 sm:pt-5 pb-5 sm:pb-6 gap-2 sm:gap-3 w-full flex-none z-2">
         {/* Title */}
