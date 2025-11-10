@@ -43,11 +43,11 @@ describe('usePokemonQuery', () => {
     next: 'https://pokeapi.co/api/v2/pokemon?offset=20&limit=20',
     previous: null,
     results: [
-      { name: 'bulbasaur', url: 'https://pokeapi.co/api/v2/pokemon/1/' },
-      { name: 'ivysaur', url: 'https://pokeapi.co/api/v2/pokemon/2/' },
-      { name: 'venusaur', url: 'https://pokeapi.co/api/v2/pokemon/3/' },
-      { name: 'charmander', url: 'https://pokeapi.co/api/v2/pokemon/4/' },
-      { name: 'charizard', url: 'https://pokeapi.co/api/v2/pokemon/6/' },
+      { id: 1, name: 'Bulbasaur', displayId: '#001', imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/other/official-artwork/1.png' },
+      { id: 2, name: 'Ivysaur', displayId: '#002', imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/other/official-artwork/2.png' },
+      { id: 3, name: 'Venusaur', displayId: '#003', imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/other/official-artwork/3.png' },
+      { id: 4, name: 'Charmander', displayId: '#004', imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/other/official-artwork/4.png' },
+      { id: 6, name: 'Charizard', displayId: '#006', imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/other/official-artwork/6.png' },
     ],
   };
 

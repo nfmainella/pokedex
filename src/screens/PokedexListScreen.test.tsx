@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PokedexListScreen } from './PokedexListScreen';
 import { usePokemonQuery } from '@/hooks/usePokemonQuery';
-import type { PokemonListResponse } from '@/hooks/usePokemonQuery';
+import type { PokemonListResponse } from '@/lib/types';
 import React from 'react';
 
 // Mock the usePokemonQuery hook
@@ -60,6 +61,7 @@ jest.mock('@/components/ui/Icon', () => ({
 const mockUsePokemonQuery = usePokemonQuery as jest.MockedFunction<typeof usePokemonQuery>;
 
 // Create a wrapper component for React Query
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -84,9 +86,9 @@ describe('PokedexListScreen', () => {
     next: 'https://pokeapi.co/api/v2/pokemon?offset=20&limit=20',
     previous: null,
     results: [
-      { name: 'bulbasaur', url: 'https://pokeapi.co/api/v2/pokemon/1/' },
-      { name: 'ivysaur', url: 'https://pokeapi.co/api/v2/pokemon/2/' },
-      { name: 'venusaur', url: 'https://pokeapi.co/api/v2/pokemon/3/' },
+      { id: 1, name: 'Bulbasaur', displayId: '#001', imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/other/official-artwork/1.png' },
+      { id: 2, name: 'Ivysaur', displayId: '#002', imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/other/official-artwork/2.png' },
+      { id: 3, name: 'Venusaur', displayId: '#003', imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/other/official-artwork/3.png' },
     ],
   };
 
@@ -322,6 +324,7 @@ describe('PokedexListScreen', () => {
     it('should update sort state when sort button is clicked', async () => {
       const user = userEvent.setup();
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       let currentSortBy: 'name' | 'id' = 'id';
       mockUsePokemonQuery.mockImplementation((params) => {
         currentSortBy = params?.sortBy || 'id';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Pokémon Service - Handles all PokeAPI interactions
  * Server-side service for API routes

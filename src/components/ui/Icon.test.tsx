@@ -9,21 +9,16 @@ describe('Icon', () => {
       // Find the SVG element
       const iconElement = container.querySelector('svg') as unknown as HTMLElement;
 
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toBeInTheDocument();
 
       // Check default size (48px)
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toHaveAttribute('width', '48');
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toHaveAttribute('height', '48');
 
       // Check default color (#1D1D1D)
       // SVG icons use fill attribute for filled icons
       const pathElement = iconElement?.querySelector('path') as unknown as HTMLElement;
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(pathElement).toBeInTheDocument();
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(pathElement).toHaveAttribute('fill', '#1D1D1D');
     });
   });
@@ -33,13 +28,10 @@ describe('Icon', () => {
       const { container } = render(<Icon name="search" size={24} color="red" />);
 
       const iconElement = container.querySelector('svg') as unknown as HTMLElement;
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toBeInTheDocument();
 
       // Check custom size (24px)
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toHaveAttribute('width', '24');
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toHaveAttribute('height', '24');
 
       // Check custom color (red)
@@ -48,7 +40,6 @@ describe('Icon', () => {
       if (pathElements && pathElements.length > 0) {
         // Check the first path element (most icons have at least one path)
         const firstPath = pathElements[0] as unknown as HTMLElement;
-        // @ts-expect-error - jest-dom matchers are available at runtime
         expect(firstPath).toHaveAttribute('fill', 'red');
       }
     });
@@ -57,9 +48,7 @@ describe('Icon', () => {
       const { container } = render(<Icon name="search" className="custom-class hover:opacity-80" />);
 
       const iconElement = container.querySelector('svg') as unknown as HTMLElement;
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toBeInTheDocument();
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toHaveClass('custom-class', 'hover:opacity-80');
     });
   });
@@ -68,17 +57,14 @@ describe('Icon', () => {
     it('should render different icon types correctly', () => {
       const { container, rerender } = render(<Icon name="arrow_back" />);
       let iconElement = container.querySelector('svg') as unknown as HTMLElement;
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toBeInTheDocument();
 
       rerender(<Icon name="chevron_left" />);
       iconElement = container.querySelector('svg') as unknown as HTMLElement;
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toBeInTheDocument();
 
       rerender(<Icon name="close" />);
       iconElement = container.querySelector('svg') as unknown as HTMLElement;
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toBeInTheDocument();
     });
   });
@@ -87,20 +73,14 @@ describe('Icon', () => {
     it('should handle different size values', () => {
       const { container, rerender } = render(<Icon name="search" size={16} />);
       let iconElement = container.querySelector('svg') as unknown as HTMLElement;
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toBeInTheDocument();
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toHaveAttribute('width', '16');
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toHaveAttribute('height', '16');
 
       rerender(<Icon name="search" size={64} />);
       iconElement = container.querySelector('svg') as unknown as HTMLElement;
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toBeInTheDocument();
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toHaveAttribute('width', '64');
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toHaveAttribute('height', '64');
     });
   });
@@ -110,13 +90,12 @@ describe('Icon', () => {
       const { container } = render(<Icon name="pokeball" />);
 
       const iconElement = container.querySelector('svg') as unknown as HTMLElement;
-      // @ts-expect-error - jest-dom matchers are available at runtime
       expect(iconElement).toBeInTheDocument();
-      
+
       // Pokeball has circle and line elements
       const circles = iconElement?.querySelectorAll('circle');
       const lines = iconElement?.querySelectorAll('line');
-      
+
       expect(circles?.length).toBeGreaterThan(0);
       expect(lines?.length).toBeGreaterThan(0);
     });

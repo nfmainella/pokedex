@@ -88,7 +88,9 @@ export async function requireAuth(): Promise<AuthUser> {
  * }
  * ```
  */
-export async function requireApiAuth(request: NextRequest): Promise<NextResponse | null> {
+export async function requireApiAuth(
+  request: NextRequest
+): Promise<NextResponse | null> {
   const isAuthenticated = await verifyAuthFromRequest(request);
 
   if (!isAuthenticated) {

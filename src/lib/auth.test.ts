@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { verifyAuth, requireAuth } from './auth';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';

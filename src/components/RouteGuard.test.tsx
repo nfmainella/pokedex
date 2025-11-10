@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouteGuard } from './RouteGuard';
 import { useAuthStatus } from '@/hooks/useAuthStatus';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import React from 'react';
 
 // Mock next/navigation
