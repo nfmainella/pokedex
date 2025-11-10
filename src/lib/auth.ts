@@ -1,34 +1,72 @@
-import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 export interface AuthUser {
   username: string;
 }
 
+interface StatusResponse {
+  success: boolean;
+  user?: {
+    username: string;
+  };
+}
+
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+
 /**
- * Verifies the JWT token from cookies and returns the decoded user
- * Returns null if token is invalid or missing
+ * Verifies authentication by proxying to the backend /api/status endpoint
+ * Returns the user if authenticated, null otherwise
+ * This uses the proxy approach - all auth logic stays in the backend
  */
 export async function verifyAuth(): Promise<AuthUser | null> {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
+    const authToken = cookieStore.get('auth_token')?.value;
 
-    if (!token) {
+    if (!authToken) {
       return null;
     }
 
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      console.error('JWT_SECRET is not set');
+    // Proxy the request to the backend
+    const response = await fetch(`${BACKEND_URL}/api/status`, {
+      method: 'GET',
+      headers: {
+        Cookie: `auth_token=${authToken}`,
+      },
+      credentials: 'include',
+      // Don't cache this request
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
       return null;
     }
 
-    const decoded = jwt.verify(token, secret) as { username: string };
-    return { username: decoded.username };
+    const data: StatusResponse = await response.json();
+
+    if (data.success && data.user) {
+      return { username: data.user.username };
+    }
+
+    return null;
   } catch (error) {
-    // Token is invalid or expired
+    console.error('Error verifying auth:', error);
     return null;
   }
+}
+
+/**
+ * Requires authentication - redirects to login if not authenticated
+ * Use this in server components to protect routes
+ */
+export async function requireAuth(): Promise<AuthUser> {
+  const user = await verifyAuth();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  return user;
 }
 
