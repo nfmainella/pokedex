@@ -48,6 +48,8 @@ export default defineConfig({
       boxShadow: {
         "card-sm": "0.10px 2px 4px rgba(0, 0, 0, 0.1)",
         "card-lg": "0.20px 4px 8px rgba(0, 0, 0, 0.2)",
+        "inner-default": "inset 0px 1px 3px 1px rgba(0, 0, 0, 0.25)",
+        "outer-active": "0px 1px 3px 1px rgba(0, 0, 0, 0.2)",
       },
     },
   },
