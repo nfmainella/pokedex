@@ -36,8 +36,9 @@ const fetchMasterPokemonList = async (): Promise<PokemonListItem[]> => {
 };
 
 /**
- * Fetches paginated and optionally sorted Pokémon list
+ * Fetches paginated and optionally sorted Pokémon list with formatting
  * Supports searching by name, sorting, and pagination on server-side
+ * Returns fully formatted data for display
  */
 export const fetchPokemonList = async (
   limit: number,
@@ -45,7 +46,7 @@ export const fetchPokemonList = async (
   sortBy: 'id' | 'name' = 'id',
   sortDir: 'asc' | 'desc' = 'asc',
   search: string = ''
-): Promise<PokemonListResponse> => {
+) => {
   try {
     // Get the master list from PokeAPI
     const masterList = await fetchMasterPokemonList();
@@ -82,16 +83,106 @@ export const fetchPokemonList = async (
       return `?${params.toString()}`;
     };
 
+    // Format the results for display
+    const formattedResults = paginatedResults.map(pokemon => {
+      const id = extractPokemonId(pokemon.url);
+      return {
+        id,
+        name: capitalize(pokemon.name),
+        displayId: formatPokemonId(id),
+        imageUrl: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+      };
+    });
+
     return {
       count: sortedList.length,
       next: next !== null ? buildQueryString(next) : null,
       previous: previous !== null ? buildQueryString(previous) : null,
-      results: paginatedResults,
+      results: formattedResults,
     };
   } catch (error) {
     console.error('Error fetching Pokemon list:', error);
     throw error;
   }
+};
+
+/**
+ * Type color mapping for Pokemon types
+ */
+const TYPE_COLORS: Record<string, string> = {
+  normal: '#A8A878',
+  fighting: '#C03028',
+  flying: '#A890F0',
+  poison: '#A040A0',
+  ground: '#E0C068',
+  rock: '#B8A038',
+  bug: '#A8B820',
+  ghost: '#705898',
+  steel: '#B8B8D0',
+  fire: '#F08030',
+  water: '#6890F0',
+  grass: '#78C850',
+  electric: '#F8D030',
+  psychic: '#F85888',
+  ice: '#98D8D8',
+  dragon: '#7038F8',
+  dark: '#705848',
+  fairy: '#EE99AC',
+};
+
+/**
+ * Stat name mapping
+ */
+const STAT_NAMES: Record<string, string> = {
+  hp: 'HP',
+  attack: 'ATK',
+  defense: 'DEF',
+  'special-attack': 'SATK',
+  'special-defense': 'SDEF',
+  speed: 'SPD',
+};
+
+/**
+ * Stat display order
+ */
+const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
+
+/**
+ * Capitalizes the first letter of a string
+ */
+const capitalize = (str: string): string => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+/**
+ * Formats ability names (capitalizes and handles hyphens)
+ */
+const formatAbilityName = (abilityName: string): string => {
+  return abilityName
+    .split('-')
+    .map(word => capitalize(word))
+    .join(' ');
+};
+
+/**
+ * Formats weight from hectograms to kilograms
+ */
+const formatWeight = (weight: number): string => {
+  return `${(weight / 10).toFixed(1)} kg`;
+};
+
+/**
+ * Formats height from decimeters to meters
+ */
+const formatHeight = (height: number): string => {
+  return `${(height / 10).toFixed(1)} m`;
+};
+
+/**
+ * Formats Pokemon ID as a zero-padded string (e.g., 1 -> "#001")
+ */
+const formatPokemonId = (id: number): string => {
+  return `#${String(id).padStart(3, '0')}`;
 };
 
 /**
@@ -132,9 +223,91 @@ const sortPokemonList = (
 };
 
 /**
+ * Fetches species data for a Pokémon (includes description)
+ * @param idOrName - Pokémon ID (number) or name (string)
+ * @returns Species data including flavor text
+ */
+const fetchPokemonSpecies = async (idOrName: number | string) => {
+  const response = await fetch(`${POKEAPI_BASE_URL}/pokemon-species/${idOrName}`);
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error('Pokemon species not found');
+    }
+    throw new Error(`Failed to fetch Pokemon species: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
+/**
+ * Extracts the first English flavor text from species data
+ * @param speciesData - Raw species data from PokeAPI
+ * @returns English description or undefined
+ */
+const extractDescription = (speciesData: any): string | undefined => {
+  if (!speciesData.flavor_text_entries) return undefined;
+
+  const englishEntry = speciesData.flavor_text_entries.find(
+    (entry: any) => entry.language?.name === 'en'
+  );
+
+  if (englishEntry?.flavor_text) {
+    // Clean up the description (remove newlines and extra spaces)
+    return englishEntry.flavor_text.replace(/\s+/g, ' ').trim();
+  }
+
+  return undefined;
+};
+
+/**
+ * Formats Pokemon detail response for display
+ */
+const formatPokemonDetailResponse = (pokemonData: any) => {
+  // Get stats in the correct order
+  const orderedStats = STAT_ORDER.map(statName => {
+    const stat = pokemonData.stats.find((s: any) => s.stat.name === statName);
+    return {
+      name: STAT_NAMES[statName] || statName.toUpperCase(),
+      value: stat?.base_stat || 0,
+      displayValue: String(stat?.base_stat || 0).padStart(3, '0'),
+    };
+  });
+
+  // Get abilities (non-hidden first)
+  const abilities = pokemonData.abilities
+    .filter((a: any) => !a.is_hidden)
+    .map((a: any) => formatAbilityName(a.ability.name));
+
+  // Get types with colors
+  const types = pokemonData.types
+    .sort((a: any, b: any) => a.slot - b.slot)
+    .map((t: any) => ({
+      name: capitalize(t.type.name),
+      color: TYPE_COLORS[t.type.name] || '#666666',
+    }));
+
+  // Select the best image (prefer official artwork)
+  const imageUrl = pokemonData.sprites.other?.['official-artwork']?.front_default || pokemonData.sprites.front_default;
+
+  return {
+    id: pokemonData.id,
+    displayId: formatPokemonId(pokemonData.id),
+    name: capitalize(pokemonData.name),
+    height: formatHeight(pokemonData.height),
+    weight: formatWeight(pokemonData.weight),
+    types,
+    stats: orderedStats,
+    abilities,
+    imageUrl,
+    description: pokemonData.description,
+  };
+};
+
+/**
  * Fetches detailed information about a specific Pokémon by ID or name
  * @param idOrName - Pokémon ID (number) or name (string)
- * @returns Complete Pokémon data including types, stats, abilities, etc.
+ * @returns Formatted complete Pokémon data including types, stats, abilities, description, etc.
  */
 export const fetchPokemonDetail = async (idOrName: number | string) => {
   const response = await fetch(`${POKEAPI_BASE_URL}/pokemon/${idOrName}`);
@@ -146,5 +319,18 @@ export const fetchPokemonDetail = async (idOrName: number | string) => {
     throw new Error(`Failed to fetch Pokemon detail: ${response.statusText}`);
   }
 
-  return response.json();
+  const pokemonData = await response.json();
+
+  // Fetch species data for description
+  try {
+    const speciesData = await fetchPokemonSpecies(idOrName);
+    const description = extractDescription(speciesData);
+    pokemonData.description = description;
+  } catch (error) {
+    // If species fetch fails, just continue without description
+    console.warn(`Could not fetch species data for Pokemon ${idOrName}:`, error);
+  }
+
+  // Format and return the Pokemon data for display
+  return formatPokemonDetailResponse(pokemonData);
 };

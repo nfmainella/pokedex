@@ -4,37 +4,13 @@ import { useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useQueryClient } from '@tanstack/react-query';
-
-/**
- * Type definition for Pokémon sprites
- */
-interface PokemonSprites {
-  front_default: string;
-}
+import type { FormattedPokemonListItem } from '@/lib/types';
 
 /**
  * Props interface for PokemonCard component
  */
 export interface PokemonCardProps {
-  pokemon: {
-    name: string;
-    id: number;
-    sprites: PokemonSprites;
-  };
-}
-
-/**
- * Formats the Pokémon ID as a zero-padded string (e.g., 1 -> "001")
- */
-function formatPokemonId(id: number): string {
-  return `#${String(id).padStart(3, '0')}`;
-}
-
-/**
- * Capitalizes the first letter of a string
- */
-function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  pokemon: FormattedPokemonListItem;
 }
 
 /**
@@ -44,6 +20,9 @@ function capitalize(str: string): string {
  * - Pokémon ID/number (top right)
  * - Pokémon name (bottom, on light gray background)
  * - Pokémon image (centered, overlapping number and name sections)
+ *
+ * All data comes pre-formatted from the backend, so this component
+ * focuses purely on rendering without any data transformations.
  *
  * Performance Optimization:
  * - Implements prefetch on hover: When the user hovers over a card, the component
@@ -59,8 +38,6 @@ function capitalize(str: string): string {
  * The card is wrapped in a Next.js Link component for navigation to the detail view.
  */
 export function PokemonCard({ pokemon }: PokemonCardProps) {
-  const formattedId = formatPokemonId(pokemon.id);
-  const capitalizedName = capitalize(pokemon.name);
   const queryClient = useQueryClient();
 
   /**
@@ -84,31 +61,31 @@ export function PokemonCard({ pokemon }: PokemonCardProps) {
   return (
     <Link
       href={`/pokemon/${pokemon.id}`}
-      className="relative block w-[104px] h-[108px] bg-white rounded-lg shadow-[0px_1px_3px_1px_rgba(0,0,0,0.2)] isolate hover:shadow-[0px_2px_6px_2px_rgba(0,0,0,0.3)] transition-shadow"
+      className="relative block bg-white rounded-lg shadow-[0px_1px_3px_1px_rgba(0,0,0,0.2)] isolate hover:shadow-[0px_2px_6px_2px_rgba(0,0,0,0.3)] transition-shadow w-full aspect-[1/1.25]"
       onMouseEnter={handleMouseEnter}
     >
       {/* Number Section - Top */}
-      <div className="flex flex-row justify-end items-start pt-1 px-2 gap-2 w-[104px] h-4 z-0">
-        <span className="text-[8px] leading-3 text-[#666666] text-right">
-          {formattedId}
+      <div className="flex flex-row justify-end items-start pt-1.5 sm:pt-2 px-2 sm:px-3 gap-2 w-full flex-none z-0">
+        <span className="text-xs sm:text-sm leading-4 sm:leading-5 text-text-muted text-right">
+          {pokemon.displayId}
         </span>
       </div>
 
       {/* Name Section - Bottom */}
-      <div className="absolute bottom-0 left-0 right-0 flex flex-row items-start pt-6 px-2 pb-1 w-[104px] h-11 bg-[#EFEFEF] rounded-[7px] z-10">
-        <span className="w-[88px] h-4 text-[10px] leading-4 text-[#1D1D1D] text-center">
-          {capitalizedName}
+      <div className="absolute bottom-0 left-0 right-0 flex flex-row items-center justify-center pt-4 sm:pt-5 px-2 sm:px-3 pb-1.5 sm:pb-2 w-full bg-background-light rounded-b-lg z-10">
+        <span className="text-xs sm:text-sm leading-4 sm:leading-5 text-text-dark text-center line-clamp-2 font-medium">
+          {pokemon.name}
         </span>
       </div>
 
       {/* Pokémon Image - Centered, Overlapping */}
-      <div className="absolute left-4 top-4 w-[72px] h-[72px] z-20">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 z-20 flex items-center justify-center aspect-square">
         <Image
-          src={pokemon.sprites.front_default}
-          alt={capitalizedName}
-          width={72}
-          height={72}
-          className="object-contain"
+          src={pokemon.imageUrl}
+          alt={pokemon.name}
+          width={128}
+          height={128}
+          className="object-contain w-full h-full"
         />
       </div>
     </Link>

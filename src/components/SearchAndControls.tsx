@@ -28,7 +28,7 @@ function SearchIcon() {
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="text-[#DC0A2D]"
+      className="text-primary"
     >
       <path
         d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z"
@@ -49,7 +49,7 @@ function CloseIcon() {
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="text-[#DC0A2D]"
+      className="text-primary"
     >
       <path
         d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
@@ -200,14 +200,13 @@ export function SearchAndControls({
   };
 
   return (
-    <div className="flex flex-row items-center gap-4 w-full h-8">
+    <div className="flex flex-row items-center gap-3 sm:gap-4 w-full h-8 sm:h-9">
       {/* Search Bar */}
-      <div className="relative flex-1 h-8">
-        <div className={`flex flex-row items-center h-full bg-white rounded-2xl ${
-          searchValue 
-            ? 'pl-3 pr-0 shadow-[0px_1px_3px_1px_rgba(0,0,0,0.2)]' 
-            : 'px-4 shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)]'
-        }`}>
+      <div className="relative flex-1 h-full">
+        <div className={`flex flex-row items-center h-full bg-white rounded-2xl ${searchValue
+            ? 'pl-3 pr-0 shadow-[0px_1px_3px_1px_rgba(0,0,0,0.2)]'
+            : 'px-3 sm:px-4 shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)]'
+          }`}>
           {/* Search Icon */}
           <div className="shrink-0">
             <SearchIcon />
@@ -219,7 +218,7 @@ export function SearchAndControls({
             value={searchValue}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Search"
-            className="flex-1 h-4 px-2 text-[10px] leading-4 text-[#1D1D1D] placeholder:text-[#666666] bg-transparent border-none outline-none"
+            className="flex-1 px-2 text-xs sm:text-sm leading-5 sm:leading-6 text-text-dark placeholder:text-text-muted bg-transparent border-none outline-none"
             aria-label="Search Pokémon"
           />
 
@@ -245,52 +244,51 @@ export function SearchAndControls({
           ref={sortButtonRef}
           type="button"
           onClick={handleSortButtonClick}
-          className="flex items-start justify-center p-2 w-8 h-8 bg-white rounded-2xl shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)] hover:opacity-90 transition-opacity"
+          className="flex items-start justify-center p-1.5 sm:p-2 w-8 h-8 sm:w-9 sm:h-9 bg-white rounded-2xl shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)] hover:opacity-90 transition-opacity"
           aria-label="Sort options"
           aria-expanded={isSortPopupOpen}
         >
-          <Icon 
-            name={initialSortBy === 'name' ? 'text_format' : 'tag'} 
-            size={16} 
-            color="#DC0A2D" 
+          <Icon
+            name={initialSortBy === 'name' ? 'text_format' : 'tag'}
+            size={18}
+            color="#DC0A2D"
           />
         </button>
 
-        {/* Sort Popup (Sort card) */}
+        {/* Sort Popup Container */}
         {isSortPopupOpen && (
           <div
             ref={popupRef}
-            className="absolute top-full right-0 mt-2 flex flex-col items-start px-1 pb-1 w-[113px] h-[132px] bg-[#DC0A2D] border-l-4 border-[#DC0A2D] rounded-xl shadow-[0px_3px_12px_3px_rgba(0,0,0,0.2)] z-50"
+            className="absolute top-full right-0 mt-2 flex flex-col w-[148px] z-50"
           >
-            {/* Frame 54 - Sort by label */}
-            <div className="flex flex-row items-start px-5 py-4 w-[105px] h-12">
+            {/* Frame 54 - Red Header */}
+            <div className="flex flex-row items-start px-5 py-4 bg-[#DC0A2D] rounded-t-lg">
               <span className="text-xs font-bold leading-4 text-white">
                 Sort by:
               </span>
             </div>
 
-            {/* Frame 55 - Radio buttons */}
-            <div className="flex flex-col items-start px-5 py-4 gap-4 w-[105px] h-20 bg-white rounded-lg shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)]">
+            <div className="flex flex-col items-start px-5 py-4 gap-4 bg-white rounded-b-lg shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)] border-4 border-[#DC0A2D]">
               {/* Radio Button: Number */}
               <label
-                className="flex flex-row items-center gap-2 w-[65px] h-4 cursor-pointer"
+                className="flex flex-row items-center gap-2 w-full cursor-pointer"
                 onClick={() => handleSortOptionClick('id')}
               >
                 <div className="shrink-0">
                   {initialSortBy === 'id' ? <RadioButtonChecked /> : <RadioButtonUnchecked />}
                 </div>
-                <span className="text-[10px] leading-4 text-[#1D1D1D]">Number</span>
+                <span className="text-xs font-normal leading-4 text-text-dark">Number</span>
               </label>
 
               {/* Radio Button: Name */}
               <label
-                className="flex flex-row items-center gap-2 w-[65px] h-4 cursor-pointer"
+                className="flex flex-row items-center gap-2 w-full cursor-pointer"
                 onClick={() => handleSortOptionClick('name')}
               >
                 <div className="shrink-0">
                   {initialSortBy === 'name' ? <RadioButtonChecked /> : <RadioButtonUnchecked />}
                 </div>
-                <span className="text-[10px] leading-4 text-[#1D1D1D]">Name</span>
+                <span className="text-xs font-normal leading-4 text-text-dark">Name</span>
               </label>
             </div>
           </div>

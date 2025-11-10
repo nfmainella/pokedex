@@ -4,21 +4,11 @@
  */
 
 /**
- * Basic Pokémon list item from PokeAPI
+ * Basic Pokémon list item from PokeAPI (internal use only)
  */
 export interface PokemonListItem {
   name: string;
   url: string;
-}
-
-/**
- * Paginated Pokémon list response
- */
-export interface PokemonListResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: PokemonListItem[];
 }
 
 /**
@@ -57,31 +47,6 @@ export interface PokemonAbility {
 }
 
 /**
- * Complete Pokémon detail response
- */
-export interface PokemonDetailResponse {
-  id: number;
-  name: string;
-  height: number; // in decimeters
-  weight: number; // in hectograms
-  types: PokemonType[];
-  stats: PokemonStat[];
-  abilities: PokemonAbility[];
-  sprites: {
-    front_default: string;
-    other?: {
-      'official-artwork'?: {
-        front_default: string;
-      };
-    };
-  };
-  species: {
-    name: string;
-    url: string;
-  };
-}
-
-/**
  * Query parameters for list endpoint
  */
 export interface PokemonQueryParams {
@@ -91,3 +56,60 @@ export interface PokemonQueryParams {
   sortBy?: 'name' | 'id';
   sortDir?: 'asc' | 'desc';
 }
+
+/**
+ * Formatted stat for display (already ordered and mapped)
+ */
+export interface FormattedStat {
+  name: string; // e.g. "HP", "ATK", "DEF"
+  value: number;
+  displayValue: string; // Zero-padded (e.g., "045")
+}
+
+/**
+ * Formatted Pokemon list item for display
+ */
+export interface FormattedPokemonListItem {
+  id: number;
+  name: string; // Capitalized (e.g., "Pikachu")
+  displayId: string; // Formatted with padding (e.g., "#001")
+  imageUrl: string; // Full sprite URL
+}
+
+/**
+ * Formatted Pokemon list response - This replaces the raw PokemonListResponse
+ * All items are pre-formatted for display
+ */
+export interface FormattedPokemonListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: FormattedPokemonListItem[];
+}
+
+/**
+ * Formatted Pokemon detail response - This replaces the raw PokemonDetailResponse
+ * All fields are pre-formatted for display
+ */
+export interface FormattedPokemonDetailResponse {
+  id: number;
+  displayId: string; // Formatted with padding (e.g., "#001")
+  name: string; // Capitalized (e.g., "Pikachu")
+  height: string; // Formatted (e.g., "0.4 m")
+  weight: string; // Formatted (e.g., "6.0 kg")
+  types: Array<{
+    name: string; // Capitalized (e.g., "Electric")
+    color: string; // Hex color code
+  }>;
+  stats: FormattedStat[]; // Already ordered: hp, attack, defense, special-attack, special-defense, speed
+  abilities: string[]; // Capitalized with spaces (e.g., "Static Electricity"), non-hidden only
+  imageUrl: string; // Preferred official artwork URL
+  description?: string;
+}
+
+/**
+ * Type aliases for backward compatibility with hooks
+ * These now point to the formatted responses since that's what the API returns
+ */
+export type PokemonListResponse = FormattedPokemonListResponse;
+export type PokemonDetailResponse = FormattedPokemonDetailResponse;

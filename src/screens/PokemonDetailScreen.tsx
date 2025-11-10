@@ -3,79 +3,22 @@
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { usePokemonDetail } from '@/hooks/usePokemonDetail';
-import { usePokemonTypeColors } from '@/hooks/usePokemonTypeColors';
 import { Icon } from '@/components/ui/Icon';
 
 /**
- * Formats the Pokémon ID as a zero-padded string (e.g., 1 -> "#001")
- */
-function formatPokemonId(id: number): string {
-  return `#${String(id).padStart(3, '0')}`;
-}
-
-/**
- * Capitalizes the first letter of a string
- */
-function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-/**
- * Formats weight from hectograms to kilograms
- */
-function formatWeight(weight: number): string {
-  return `${(weight / 10).toFixed(1)} kg`;
-}
-
-/**
- * Formats height from decimeters to meters
- */
-function formatHeight(height: number): string {
-  return `${(height / 10).toFixed(1)} m`;
-}
-
-/**
- * Formats ability names (capitalizes and handles hyphens)
- */
-function formatAbilityName(abilityName: string): string {
-  return abilityName
-    .split('-')
-    .map(word => capitalize(word))
-    .join(' ');
-}
-
-/**
- * Stat names mapping
- */
-const STAT_NAMES: Record<string, string> = {
-  hp: 'HP',
-  attack: 'ATK',
-  defense: 'DEF',
-  'special-attack': 'SATK',
-  'special-defense': 'SDEF',
-  speed: 'SPD',
-};
-
-/**
- * Stat order for display
- */
-const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
-
-/**
  * PokemonDetailScreen Component
- * 
+ *
  * Displays detailed information about a Pokémon with dynamic colors based on types.
- * Matches the design specifications from the Figma CSS.
+ * All data formatting is done on the backend, this component just displays it.
  */
 export function PokemonDetailScreen({ id }: { id: number | string }) {
   const router = useRouter();
-  const { data: pokemon, isLoading, isError, error } = usePokemonDetail(id);
-  const { primaryColor, typeColors, typeNames } = usePokemonTypeColors(pokemon || null);
+  const { data: pokemon, isLoading, isError } = usePokemonDetail(id);
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex flex-col items-start p-1 relative w-[360px] h-[640px] bg-gray-300">
+      <div className="flex flex-col items-start p-1 relative bg-gray-300">
         <div className="flex items-center justify-center w-full h-full">
           <div className="animate-spin">
             <Icon name="pokeball" size={48} color="#666666" />
@@ -88,12 +31,12 @@ export function PokemonDetailScreen({ id }: { id: number | string }) {
   // Error state
   if (isError || !pokemon) {
     return (
-      <div className="flex flex-col items-start p-1 relative w-[360px] h-[640px] bg-gray-300">
+      <div className="flex flex-col items-start p-1 relative bg-gray-300">
         <div className="flex flex-col items-center justify-center w-full h-full gap-4">
           <p className="text-gray-600">Error loading Pokémon</p>
           <button
             onClick={() => router.back()}
-            className="px-4 py-2 bg-primary text-white rounded-lg"
+            className="px-4 py-2 bg-[#DC0A2D] text-white rounded-lg"
           >
             Go Back
           </button>
@@ -102,211 +45,221 @@ export function PokemonDetailScreen({ id }: { id: number | string }) {
     );
   }
 
-  const formattedId = formatPokemonId(pokemon.id);
-  const capitalizedName = capitalize(pokemon.name);
-  const imageUrl = pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default;
+  // Get primary color from first type for styling
+  const primaryColor = pokemon.types[0]?.color || '#666666';
 
-  // Get stats in the correct order
-  const orderedStats = STAT_ORDER.map(statName => {
-    const stat = pokemon.stats.find(s => s.stat.name === statName);
-    return {
-      name: STAT_NAMES[statName] || statName.toUpperCase(),
-      value: stat?.base_stat || 0,
-      statName,
-    };
-  });
+  /**
+   * Navigate to the next Pokémon
+   */
+  const handleNextPokemon = () => {
+    const nextId = pokemon.id + 1;
+    router.push(`/pokemon/${nextId}`);
+  };
 
-  // Get abilities (non-hidden first)
-  const abilities = pokemon.abilities
-    .filter(a => !a.is_hidden)
-    .map(a => formatAbilityName(a.ability.name));
+  /**
+   * Navigate to the previous Pokémon
+   */
+  const handlePreviousPokemon = () => {
+    if (pokemon.id > 1) {
+      const prevId = pokemon.id - 1;
+      router.push(`/pokemon/${prevId}`);
+    }
+  };
 
   return (
     <div
-      className="flex flex-col items-start p-1 relative w-[360px] h-[640px] isolate"
-      style={{ backgroundColor: primaryColor }}
+      className="flex flex-col items-start p-0 relative w-full h-full isolate"
+      style={{ backgroundColor: primaryColor, maxWidth: '100%' }}
     >
       {/* Title Section - Header with back button, name, and ID */}
-      <div className="flex flex-row items-center px-5 pt-5 pb-6 gap-2 w-[352px] h-[76px] z-[3]">
+      <div className="flex flex-row items-center px-4 sm:px-6 pt-4 sm:pt-5 pb-5 sm:pb-6 gap-2 w-full flex-none z-3">
         <button
-          onClick={() => router.back()}
-          className="w-8 h-8 flex items-center justify-center"
-          aria-label="Go back"
+          onClick={() => router.push('/')}
+          className="w-8 h-8 flex items-center justify-center shrink-0"
+          aria-label="Go Home"
         >
           <Icon name="arrow_back" size={32} color="#FFFFFF" />
         </button>
-        
-        <h1 className="w-[229px] h-8 text-2xl leading-8 font-bold text-white flex items-center flex-grow">
-          {capitalizedName}
+
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-8 sm:leading-10 flex items-center grow min-w-0 truncate">
+          {pokemon.name}
         </h1>
-        
-        <span className="w-[35px] h-4 text-xs leading-4 font-bold text-white flex items-center flex-none">
-          {formattedId}
+
+        <span className="text-sm sm:text-base font-bold text-white leading-4 sm:leading-6 flex items-center shrink-0">
+          {pokemon.displayId}
         </span>
       </div>
 
       {/* Image Section with navigation arrows */}
-      <div className="flex flex-row justify-between items-end px-5 py-4 gap-2 w-[352px] h-[144px] isolate z-[2]">
+      <div className="flex flex-row justify-between px-5 py-6 gap-2 w-full flex-[0.35] isolate relative z-20 mb-8 sm:mb-12 items-end">
         <button
-          className="w-6 h-6 flex items-center justify-center"
+          onClick={handlePreviousPokemon}
+          disabled={pokemon.id <= 1}
+          className="w-6 h-6 flex items-center justify-center shrink-0 z-10 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-80 transition-opacity"
           aria-label="Previous Pokémon"
         >
           <Icon name="chevron_left" size={24} color="#FFFFFF" />
         </button>
-        
-        <div className="absolute left-[76px] top-0 w-[200px] h-[200px] z-[2]">
+
+        <div className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2 z-30 flex items-center justify-center w-50 h-50 aspect-square">
           <Image
-            src={imageUrl}
-            alt={capitalizedName}
             width={200}
             height={200}
-            className="object-contain"
+            src={pokemon.imageUrl}
+            alt={pokemon.name}
+            className="object-contain w-full h-full"
             priority
           />
         </div>
-        
+
         <button
-          className="w-6 h-6 flex items-center justify-center"
+          onClick={handleNextPokemon}
+          className="w-6 h-6 flex items-center justify-center shrink-0 z-10 hover:opacity-80 transition-opacity"
           aria-label="Next Pokémon"
         >
           <Icon name="chevron_right" size={24} color="#FFFFFF" />
         </button>
       </div>
 
-      {/* Card Section - White card with all details */}
-      <div className="flex flex-col items-start pt-14 px-5 pb-5 gap-4 w-[352px] h-[412px] bg-white shadow-inner-default rounded-lg z-[1]">
-        {/* Type Chips */}
-        <div className="flex flex-row justify-center items-start gap-4 w-[312px] h-5">
-          {typeNames.map((typeName, i) => (
-            <span
-              key={typeName}
-              className="px-2 py-0.5 rounded-[10px] text-white text-[10px] leading-4 font-bold flex items-center"
-              style={{ backgroundColor: typeColors[i] }}
-            >
-              {capitalize(typeName)}
-            </span>
-          ))}
-        </div>
-
-        {/* About Section */}
-        <h2
-          className="w-[312px] h-4 text-sm leading-4 font-bold flex items-center"
-          style={{ color: primaryColor }}
-        >
-          About
-        </h2>
-
-        {/* Attributes: Weight, Height, Abilities */}
-        <div className="flex flex-row items-start w-[312px] h-12 bg-white">
-          {/* Weight */}
-          <div className="flex flex-col items-center gap-1 w-[103.33px] h-12 flex-grow">
-            <div className="flex flex-row justify-center items-center py-2 gap-2 w-full h-8">
-              <Icon name="weight" size={16} color="#1D1D1D" />
-              <span className="text-[10px] leading-4 text-[#1D1D1D]">
-                {formatWeight(pokemon.weight)}
-              </span>
-            </div>
-            <span className="w-full h-3 text-[8px] leading-3 text-[#666666] text-center">
-              Weight
-            </span>
-          </div>
-
-          <div className="w-px h-12 bg-[#E0E0E0] flex-none" />
-
-          {/* Height */}
-          <div className="flex flex-col items-center gap-1 w-[103.33px] h-12 flex-grow">
-            <div className="flex flex-row justify-center items-center py-2 gap-2 w-full h-8">
-              <Icon name="straighten" size={16} color="#1D1D1D" />
-              <span className="text-[10px] leading-4 text-[#1D1D1D]">
-                {formatHeight(pokemon.height)}
-              </span>
-            </div>
-            <span className="w-full h-3 text-[8px] leading-3 text-[#666666] text-center">
-              Height
-            </span>
-          </div>
-
-          <div className="w-px h-12 bg-[#E0E0E0] flex-none" />
-
-          {/* Moves/Abilities */}
-          <div className="flex flex-col items-center gap-1 w-[103.33px] h-12 flex-grow">
-            <div className="flex flex-row items-center gap-2 w-full h-8">
-              <span className="text-[10px] leading-4 text-[#1D1D1D]">
-                {abilities.join(' ')}
-              </span>
-            </div>
-            <span className="w-full h-3 text-[8px] leading-3 text-[#666666] text-center">
-              Moves
-            </span>
-          </div>
-        </div>
-
-        {/* Description placeholder */}
-        <p className="w-[312px] h-[60px] text-[10px] leading-4 text-[#1D1D1D] flex items-center text-justify flex-grow">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc iaculis eros vitae tellus condimentum maximus sit amet in eros.
-        </p>
-
-        {/* Base Stats Section */}
-        <h2
-          className="w-[312px] h-4 text-sm leading-4 font-bold flex items-center flex-none"
-          style={{ color: primaryColor }}
-        >
-          Base Stats
-        </h2>
-
-        {/* Stats Grid */}
-        <div className="flex flex-row items-start gap-2 w-[312px] h-24 bg-white flex-none">
-          {/* Labels Column */}
-          <div className="flex flex-col items-start pr-1 w-[31px] h-24 flex-none">
-            {orderedStats.map((stat) => (
-              <div
-                key={stat.statName}
-                className="w-[27px] h-4 text-[10px] leading-4 font-bold flex items-center text-right flex-none"
-                style={{ color: primaryColor }}
+      {/* Card Container with padding to show colored background */}
+      <div className="w-full px-3 sm:px-4 md:px-6 flex-[0.65] z-10 mb-3 sm:mb-4">
+        {/* Card Section - White card with all details */}
+        <div className="flex flex-col items-start justify-evenly pt-6 sm:pt-8 px-4 sm:px-6 md:px-8 pb-6 sm:pb-8 gap-4 sm:gap-6 w-full bg-white rounded-3xl">
+          {/* Type Chips */}
+          <div className="flex flex-row justify-center items-start gap-3 sm:gap-4 w-full flex-none mt-8">
+            {pokemon.types.map((type) => (
+              <span
+                key={type.name}
+                className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-[10px] text-white text-xs sm:text-sm leading-5 sm:leading-6 font-bold flex items-center whitespace-nowrap"
+                style={{ backgroundColor: type.color }}
               >
-                {stat.name}
-              </div>
+                {type.name}
+              </span>
             ))}
           </div>
 
-          <div className="w-px h-24 bg-[#E0E0E0] flex-none" />
+          {/* About Section */}
+          <h2
+            className="w-full text-base sm:text-lg md:text-xl leading-6 sm:leading-8 font-bold flex items-center justify-center text-center flex-none"
+            style={{ color: primaryColor }}
+          >
+            About
+          </h2>
 
-          {/* Values Column */}
-          <div className="flex flex-col items-start pl-1 w-[23px] h-24 flex-none">
-            {orderedStats.map((stat) => (
-              <div
-                key={stat.statName}
-                className="w-[19px] h-4 text-[10px] leading-4 text-[#1D1D1D] flex items-center flex-none"
-              >
-                {stat.value}
+          {/* Attributes: Weight, Height, Abilities */}
+          <div className="flex flex-row items-center w-full gap-3 sm:gap-4 flex-none py-2 sm:py-3">
+            {/* Weight */}
+            <div className="flex flex-col items-center gap-1 sm:gap-2 grow min-w-0">
+              <div className="flex flex-row justify-center items-center py-1 sm:py-2 gap-2 w-full flex-none">
+                <Icon name="weight" size={18} color="#1D1D1D" />
+                <span className="text-xs sm:text-sm leading-5 sm:leading-6 text-text-dark text-justify">
+                  {pokemon.weight}
+                </span>
               </div>
-            ))}
+              <span className="w-full text-xs sm:text-sm leading-4 sm:leading-5 text-gray-500 text-center flex-none">
+                Weight
+              </span>
+            </div>
+
+            <div className="w-px h-14 sm:h-16 bg-gray-200 flex-none" />
+
+            {/* Height */}
+            <div className="flex flex-col items-center gap-1 sm:gap-2 grow min-w-0">
+              <div className="flex flex-row justify-center items-center py-1 sm:py-2 gap-2 w-full flex-none">
+                <Icon name="straighten" size={18} color="#1D1D1D" />
+                <span className="text-xs sm:text-sm leading-5 sm:leading-6 text-text-dark text-justify">
+                  {pokemon.height}
+                </span>
+              </div>
+              <span className="w-full text-xs sm:text-sm leading-4 sm:leading-5 text-gray-500 text-center flex-none">
+                Height
+              </span>
+            </div>
+
+            <div className="w-px h-14 sm:h-16 bg-gray-200 flex-none" />
+
+            {/* Moves/Abilities */}
+            <div className="flex flex-col items-center gap-1 sm:gap-2 grow min-w-0">
+              <div className="flex flex-row items-center justify-center gap-2 w-full flex-none overflow-hidden">
+                <span className="text-xs sm:text-sm leading-5 sm:leading-6 text-text-dark text-center line-clamp-2">
+                  {pokemon.abilities.length > 0 ? pokemon.abilities.join(', ') : 'None'}
+                </span>
+              </div>
+              <span className="w-full text-xs sm:text-sm leading-4 sm:leading-5 text-gray-500 text-center flex-none">
+                Abilities
+              </span>
+            </div>
           </div>
 
-          {/* Chart Column */}
-          <div className="flex flex-col items-start w-[233px] h-24 grow">
-            {orderedStats.map((stat) => {
-              const percentage = Math.min((stat.value / 255) * 100, 100);
-              return (
-                <div key={stat.statName} className="flex flex-col justify-center items-start w-full h-4 flex-none">
-                  <div className="flex flex-row items-start w-full h-1 rounded mb-[-4px]">
-                    <div
-                      className="h-full rounded grow"
-                      style={{
-                        width: `${percentage}%`,
-                        backgroundColor: primaryColor,
-                      }}
-                    />
-                  </div>
-                  <div
-                    className="w-full h-1 rounded"
-                    style={{
-                      backgroundColor: `${primaryColor}33`, // 20% opacity
-                    }}
-                  />
+          {/* Description */}
+          <p className="text-xs sm:text-sm leading-5 sm:leading-6 text-text-dark text-center w-full">
+            {pokemon.description || 'No description available.'}
+          </p>
+
+          {/* Base Stats Section */}
+          <h2
+            className="w-full text-base sm:text-lg md:text-xl leading-6 sm:leading-8 font-bold flex items-center justify-center text-center flex-none"
+            style={{ color: primaryColor }}
+          >
+            Base Stats
+          </h2>
+
+          {/* Stats Grid */}
+          <div className="flex flex-row items-start gap-2 sm:gap-3 w-full bg-white flex-none">
+            {/* Labels Column */}
+            <div className="flex flex-col items-start pr-1 sm:pr-2 gap-2 sm:gap-3 flex-none">
+              {pokemon.stats.map((stat) => (
+                <div
+                  key={stat.name}
+                  className="text-xs sm:text-sm leading-5 sm:leading-6 font-bold flex items-center text-right flex-none"
+                  style={{ color: primaryColor }}
+                >
+                  {stat.name}
                 </div>
-              );
-            })}
+              ))}
+            </div>
+
+            <div className="w-px bg-gray-200 flex-none self-stretch" />
+
+            {/* Values Column */}
+            <div className="flex flex-col items-start pl-1 sm:pl-2 gap-2 sm:gap-3 flex-none">
+              {pokemon.stats.map((stat) => (
+                <div
+                  key={stat.name}
+                  className="text-xs sm:text-sm leading-5 sm:leading-6 text-text-dark flex items-center flex-none"
+                >
+                  {stat.displayValue}
+                </div>
+              ))}
+            </div>
+
+            {/* Chart Column */}
+            <div className="flex flex-col items-start gap-7.5 grow">
+              {pokemon.stats.map((stat) => {
+                const percentage = Math.min((stat.value / 255) * 100, 100);
+                return (
+                  <div key={stat.name} className="flex flex-col items-start w-full flex-none">
+                    <div className="relative w-full h-1.5 sm:h-2">
+                      {/* Background bar */}
+                      <div
+                        className="absolute inset-0 w-full h-full rounded-[4px]"
+                        style={{
+                          backgroundColor: `${primaryColor}33`, // 20% opacity
+                        }}
+                      />
+                      {/* Value bar */}
+                      <div
+                        className="absolute inset-0 h-full rounded-[4px]"
+                        style={{
+                          width: `${percentage}%`,
+                          backgroundColor: primaryColor,
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

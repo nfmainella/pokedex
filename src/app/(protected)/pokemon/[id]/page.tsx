@@ -21,12 +21,13 @@ export default async function PokemonDetailPage({
 
   // Parse ID - can be number or name
   const { id } = await params;
+  if (!id) {
+    return <div>No ID provided</div>;
+  }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 font-sans">
-      <div className="flex items-center justify-center p-4">
-        <PokemonDetailScreen id={id} />
-      </div>
+    <div className="w-full h-screen bg-gray-100 font-sans overflow-hidden">
+      <PokemonDetailScreen id={id} />
     </div>
   );
 }
