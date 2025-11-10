@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 import { ReadableStream, WritableStream } from 'stream/web';
 
 // Polyfill for MSW in Node.js environment

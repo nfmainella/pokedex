@@ -1,6 +1,5 @@
 import { requireAuth } from '@/lib/auth';
 import HomePage from './page';
-import ProtectedPageClient from './ProtectedPageClient';
 
 // Mock the auth utility
 jest.mock('@/lib/auth', () => ({

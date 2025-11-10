@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchPokemonList } from '@/lib/pokemonService';
+import { requireApiAuth } from '@/lib/auth';
 
 /**
  * GET /api/pokemon
@@ -13,6 +14,10 @@ import { fetchPokemonList } from '@/lib/pokemonService';
  * - search: Optional search query to filter by name
  */
 export async function GET(request: NextRequest) {
+  // Verify authentication
+  const authError = await requireApiAuth(request);
+  if (authError) return authError;
+
   try {
     // Get query parameters from the request
     const { searchParams } = new URL(request.url);

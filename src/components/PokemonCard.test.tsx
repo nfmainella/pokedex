@@ -55,16 +55,15 @@ const createWrapper = () => {
 describe('PokemonCard', () => {
   const mockPokemon: PokemonCardProps['pokemon'] = {
     id: 1,
-    name: 'bulbasaur',
-    sprites: {
-      front_default: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
-    },
+    name: 'Bulbasaur',
+    displayId: '#001',
+    imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/other/official-artwork/1.png',
   };
 
   it('should render the Pokémon name, number, and image', () => {
     render(<PokemonCard pokemon={mockPokemon} />, { wrapper: createWrapper() });
 
-    // Check name is rendered and capitalized
+    // Check name is rendered
     expect(screen.getByText('Bulbasaur')).toBeInTheDocument();
 
     // Check ID/number is rendered with proper formatting
@@ -73,7 +72,7 @@ describe('PokemonCard', () => {
     // Check image is rendered with correct src and alt
     const image = screen.getByAltText('Bulbasaur');
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute('src', mockPokemon.sprites.front_default);
+    expect(image).toHaveAttribute('src', mockPokemon.imageUrl);
   });
 
   it('should wrap the card in a link that points to the correct detail URL', () => {

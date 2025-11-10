@@ -27,7 +27,7 @@ export function PokedexListScreen() {
   const [offset, setOffset] = useState<number>(0);
   const [search, setSearch] = useState<string>('');
   const [sortBy, setSortBy] = useState<'name' | 'id'>('id');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [sortDir] = useState<'asc' | 'desc'>('asc');
 
   const queryParams: PokemonQueryParams = {
     limit,
@@ -78,9 +78,9 @@ export function PokedexListScreen() {
   // Loading state - show spinning Pokeball
   if (isLoading) {
     return (
-      <div className="w-full min-h-screen sm:min-h-[640px] bg-[#DC0A2D] p-1 flex items-center justify-center">
+      <div className="w-full h-screen bg-[#DC0A2D] p-1 flex items-center justify-center">
         <div className="animate-spin">
-          <Icon name="pokeball" size={48} color="#FFFFFF" />
+          <Icon name="pokeball" size={48} color="rgb(255, 255, 255)" />
         </div>
       </div>
     );
@@ -89,7 +89,7 @@ export function PokedexListScreen() {
   // Error state
   if (isError) {
     return (
-      <div className="w-full min-h-screen sm:min-h-[640px] bg-[#DC0A2D] p-1 flex items-center justify-center">
+      <div className="w-full h-screen bg-[#DC0A2D] p-1 flex items-center justify-center">
         <div className="bg-white rounded-lg p-6 shadow-lg max-w-md mx-4">
           <p className="text-center text-gray-900 font-medium">
             Failed to load Pokémon list. Please try again later.
@@ -105,12 +105,12 @@ export function PokedexListScreen() {
   }
 
   return (
-    <div className="w-full min-h-screen sm:min-h-[640px] bg-[#DC0A2D] p-1 flex flex-col isolate">
+    <div className="w-full h-screen bg-[#DC0A2D] p-1 flex flex-col isolate overflow-hidden">
       {/* Header Section (Frame 29) */}
       <div className="flex flex-col items-start px-4 sm:px-6 md:px-8 pt-4 sm:pt-5 pb-5 sm:pb-6 gap-2 sm:gap-3 w-full flex-none z-2">
         {/* Title */}
         <div className="flex flex-row items-center gap-2 sm:gap-4 w-full">
-          <Icon name="pokeball" size={28} color="#FFFFFF" />
+          <Icon name="pokeball" size={28} color="rgb(255, 255, 255)" />
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-8 sm:leading-10">
             Pokédex
           </h1>
@@ -128,7 +128,7 @@ export function PokedexListScreen() {
       </div>
 
       {/* List Body */}
-      <div className="bg-white shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)] rounded-lg pt-6 sm:pt-8 px-4 sm:px-6 md:px-8 pb-0 flex-1 overflow-y-auto z-1">
+      <div className="bg-white shadow-inner-default rounded-lg pt-6 sm:pt-8 px-4 sm:px-6 md:px-8 pb-0 flex-1 overflow-y-auto z-1">
         {!data?.results || data.results.length === 0 ? (
           <div className="flex items-center justify-center h-full min-h-[200px]">
             <p className="text-center text-gray-600 font-medium">
@@ -149,10 +149,10 @@ export function PokedexListScreen() {
               <button
                 onClick={handlePreviousPage}
                 disabled={!data?.previous}
-                className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white text-primary shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)] disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0px_1px_3px_1px_rgba(0,0,0,0.2)] transition-shadow"
+                className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white text-primary shadow-inner-default disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-outer-active transition-shadow"
                 aria-label="Previous page"
               >
-                <Icon name="chevron_left" size={20} color="#DC0A2D" />
+                <Icon name="chevron_left" size={20} color="rgb(220, 10, 45)" />
               </button>
 
               <span className="text-xs sm:text-sm text-gray-600">
@@ -162,10 +162,10 @@ export function PokedexListScreen() {
               <button
                 onClick={handleNextPage}
                 disabled={!data?.next}
-                className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white text-primary shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)] disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0px_1px_3px_1px_rgba(0,0,0,0.2)] transition-shadow"
+                className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white text-primary shadow-inner-default disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-outer-active transition-shadow"
                 aria-label="Next page"
               >
-                <Icon name="chevron_right" size={20} color="#DC0A2D" />
+                <Icon name="chevron_right" size={20} color="rgb(220, 10, 45)" />
               </button>
             </div>
           </>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchPokemonDetail } from '@/lib/pokemonService';
+import { requireApiAuth } from '@/lib/auth';
 
 /**
  * GET /api/pokemon/[id]
@@ -9,6 +10,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Verify authentication
+  const authError = await requireApiAuth(request);
+  if (authError) return authError;
+
   try {
     const { id } = await params;
 

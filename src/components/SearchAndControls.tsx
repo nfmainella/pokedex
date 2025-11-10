@@ -71,8 +71,8 @@ function RadioButtonChecked() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <circle cx="8" cy="8" r="7" stroke="#DC0A2D" strokeWidth="1" fill="white" />
-      <circle cx="8" cy="8" r="4" fill="#DC0A2D" />
+      <circle cx="8" cy="8" r="7" stroke="rgb(220, 10, 45)" strokeWidth="1" fill="white" />
+      <circle cx="8" cy="8" r="4" fill="rgb(220, 10, 45)" />
     </svg>
   );
 }
@@ -89,7 +89,7 @@ function RadioButtonUnchecked() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <circle cx="8" cy="8" r="7" stroke="#DC0A2D" strokeWidth="1" fill="white" />
+      <circle cx="8" cy="8" r="7" stroke="rgb(220, 10, 45)" strokeWidth="1" fill="white" />
     </svg>
   );
 }
@@ -116,11 +116,9 @@ export function SearchAndControls({
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sortButtonRef = useRef<HTMLButtonElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync with parent when initialSearch changes externally
-  useEffect(() => {
-    setSearchValue(initialSearch);
-  }, [initialSearch]);
+
 
   // Cleanup debounce timer on unmount
   useEffect(() => {
@@ -204,8 +202,8 @@ export function SearchAndControls({
       {/* Search Bar */}
       <div className="relative flex-1 h-full">
         <div className={`flex flex-row items-center h-full bg-white rounded-2xl ${searchValue
-            ? 'pl-3 pr-0 shadow-[0px_1px_3px_1px_rgba(0,0,0,0.2)]'
-            : 'px-3 sm:px-4 shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)]'
+            ? 'pl-3 pr-0 shadow-outer-active'
+            : 'px-3 sm:px-4 shadow-inner-default'
           }`}>
           {/* Search Icon */}
           <div className="shrink-0">
@@ -214,6 +212,7 @@ export function SearchAndControls({
 
           {/* Search Input */}
           <input
+            ref={inputRef}
             type="text"
             value={searchValue}
             onChange={(e) => handleSearchChange(e.target.value)}
@@ -244,14 +243,14 @@ export function SearchAndControls({
           ref={sortButtonRef}
           type="button"
           onClick={handleSortButtonClick}
-          className="flex items-start justify-center p-1.5 sm:p-2 w-8 h-8 sm:w-9 sm:h-9 bg-white rounded-2xl shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)] hover:opacity-90 transition-opacity"
+          className="flex items-start justify-center p-1.5 sm:p-2 w-8 h-8 sm:w-9 sm:h-9 bg-white rounded-2xl shadow-inner-default hover:opacity-90 transition-opacity"
           aria-label="Sort options"
           aria-expanded={isSortPopupOpen}
         >
           <Icon
             name={initialSortBy === 'name' ? 'text_format' : 'tag'}
             size={18}
-            color="#DC0A2D"
+            color="rgb(220, 10, 45)"
           />
         </button>
 
@@ -268,7 +267,7 @@ export function SearchAndControls({
               </span>
             </div>
 
-            <div className="flex flex-col items-start px-5 py-4 gap-4 bg-white rounded-b-lg shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)] border-4 border-[#DC0A2D]">
+            <div className="flex flex-col items-start px-5 py-4 gap-4 bg-white rounded-b-lg shadow-inner-default border-4 border-[#DC0A2D]">
               {/* Radio Button: Number */}
               <label
                 className="flex flex-row items-center gap-2 w-full cursor-pointer"
