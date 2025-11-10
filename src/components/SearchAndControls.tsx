@@ -118,15 +118,7 @@ export function SearchAndControls({
   const popupRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync with parent when initialSearch changes externally (but preserve focus when typing)
-  useEffect(() => {
-    // Only sync if the input is not currently focused
-    if (inputRef.current !== document.activeElement) {
-      setTimeout(() => {
-        setSearchValue(initialSearch);
-      }, 0);
-    }
-  }, [initialSearch]);
+
 
   // Cleanup debounce timer on unmount
   useEffect(() => {
