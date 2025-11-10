@@ -18,9 +18,13 @@ const createWrapper = () => {
     },
   });
 
-  return ({ children }: { children: React.ReactNode }) => (
+  const QueryWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+
+  QueryWrapper.displayName = 'QueryWrapper';
+
+  return QueryWrapper;
 };
 
 describe('useAuthStatus', () => {
@@ -28,9 +32,9 @@ describe('useAuthStatus', () => {
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
-  it('should return isAuthenticated: true when the mocked /api/status endpoint returns 200', async () => {
+  it('should return isAuthenticated: true when the mocked /api/auth/status endpoint returns 200', async () => {
     server.use(
-      http.get('http://localhost:3001/api/status', () => {
+      http.get('/api/auth/status', () => {
         return HttpResponse.json({
           success: true,
           user: {
@@ -61,9 +65,9 @@ describe('useAuthStatus', () => {
     expect(result.current.user).toEqual({ username: 'admin' });
   });
 
-  it('should return isAuthenticated: false when the mocked /api/status endpoint returns 401', async () => {
+  it('should return isAuthenticated: false when the mocked /api/auth/status endpoint returns 401', async () => {
     server.use(
-      http.get('http://localhost:3001/api/status', () => {
+      http.get('/api/auth/status', () => {
         return HttpResponse.json(
           {
             error: 'Unauthorized: No token provided',
