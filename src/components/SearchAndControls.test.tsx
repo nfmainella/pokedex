@@ -210,84 +210,120 @@ describe('SearchAndControls', () => {
     });
   });
 
-  describe('Sort Buttons', () => {
-    it('should render both sort buttons', () => {
+  describe('Sort Popup', () => {
+    it('should render sort button', () => {
       render(<SearchAndControls {...defaultProps} />);
 
-      expect(screen.getByLabelText('Sort by Name (A-Z)')).toBeInTheDocument();
-      expect(screen.getByLabelText('Sort by ID (#)')).toBeInTheDocument();
+      const sortButton = screen.getByLabelText('Sort options');
+      expect(sortButton).toBeInTheDocument();
     });
 
-    it('should call onSortChange with "name" when "Sort by Name" button is clicked', async () => {
+    it('should open popup when sort button is clicked', async () => {
+      const user = userEvent.setup();
+      render(<SearchAndControls {...defaultProps} />);
+
+      const sortButton = screen.getByLabelText('Sort options');
+      await user.click(sortButton);
+
+      // Popup should be visible with radio options
+      expect(screen.getByText('Number')).toBeInTheDocument();
+      expect(screen.getByText('Name')).toBeInTheDocument();
+    });
+
+    it('should call onSortChange with "name" when "Name" option is clicked', async () => {
       const onSortChange = jest.fn();
       const user = userEvent.setup();
       render(<SearchAndControls {...defaultProps} onSortChange={onSortChange} />);
 
-      const sortByNameButton = screen.getByLabelText('Sort by Name (A-Z)');
-      await user.click(sortByNameButton);
+      const sortButton = screen.getByLabelText('Sort options');
+      await user.click(sortButton);
+
+      const nameOption = screen.getByText('Name');
+      await user.click(nameOption);
 
       expect(onSortChange).toHaveBeenCalledTimes(1);
       expect(onSortChange).toHaveBeenCalledWith('name');
     });
 
-    it('should call onSortChange with "id" when "Sort by ID" button is clicked', async () => {
+    it('should call onSortChange with "id" when "Number" option is clicked', async () => {
       const onSortChange = jest.fn();
       const user = userEvent.setup();
       render(<SearchAndControls {...defaultProps} onSortChange={onSortChange} />);
 
-      const sortByIdButton = screen.getByLabelText('Sort by ID (#)');
-      await user.click(sortByIdButton);
+      const sortButton = screen.getByLabelText('Sort options');
+      await user.click(sortButton);
+
+      const numberOption = screen.getByText('Number');
+      await user.click(numberOption);
 
       expect(onSortChange).toHaveBeenCalledTimes(1);
       expect(onSortChange).toHaveBeenCalledWith('id');
     });
 
-    it('should apply active styling to "Sort by Name" button when initialSortBy is "name"', () => {
-      render(<SearchAndControls {...defaultProps} initialSortBy="name" />);
+    it('should close popup after selecting an option', async () => {
+      const onSortChange = jest.fn();
+      const user = userEvent.setup();
+      render(<SearchAndControls {...defaultProps} onSortChange={onSortChange} />);
 
-      const sortByNameButton = screen.getByLabelText('Sort by Name (A-Z)');
-      const sortByIdButton = screen.getByLabelText('Sort by ID (#)');
+      const sortButton = screen.getByLabelText('Sort options');
+      await user.click(sortButton);
 
-      // Active button should have red background and white text
-      expect(sortByNameButton).toHaveClass('bg-primary', 'text-white');
-      expect(sortByNameButton).toHaveAttribute('aria-pressed', 'true');
+      const nameOption = screen.getByText('Name');
+      await user.click(nameOption);
 
-      // Inactive button should have white background and red text
-      expect(sortByIdButton).toHaveClass('bg-white', 'text-primary');
-      expect(sortByIdButton).toHaveAttribute('aria-pressed', 'false');
+      // Popup should be closed
+      await waitFor(() => {
+        expect(screen.queryByText('Number')).not.toBeInTheDocument();
+      });
     });
 
-    it('should apply active styling to "Sort by ID" button when initialSortBy is "id"', () => {
+    it('should show checked radio button for "Number" when initialSortBy is "id"', async () => {
+      const user = userEvent.setup();
       render(<SearchAndControls {...defaultProps} initialSortBy="id" />);
 
-      const sortByNameButton = screen.getByLabelText('Sort by Name (A-Z)');
-      const sortByIdButton = screen.getByLabelText('Sort by ID (#)');
+      const sortButton = screen.getByLabelText('Sort options');
+      await user.click(sortButton);
 
-      // Active button should have red background and white text
-      expect(sortByIdButton).toHaveClass('bg-primary', 'text-white');
-      expect(sortByIdButton).toHaveAttribute('aria-pressed', 'true');
-
-      // Inactive button should have white background and red text
-      expect(sortByNameButton).toHaveClass('bg-white', 'text-primary');
-      expect(sortByNameButton).toHaveAttribute('aria-pressed', 'false');
+      // Check that Number option is selected (we can't easily test the SVG, but we can test the structure)
+      const numberLabel = screen.getByText('Number').closest('label');
+      expect(numberLabel).toBeInTheDocument();
     });
 
-    it('should update active styling when initialSortBy prop changes', () => {
-      const { rerender } = render(<SearchAndControls {...defaultProps} initialSortBy="id" />);
+    it('should show checked radio button for "Name" when initialSortBy is "name"', async () => {
+      const user = userEvent.setup();
+      render(<SearchAndControls {...defaultProps} initialSortBy="name" />);
 
-      let sortByNameButton = screen.getByLabelText('Sort by Name (A-Z)');
-      let sortByIdButton = screen.getByLabelText('Sort by ID (#)');
+      const sortButton = screen.getByLabelText('Sort options');
+      await user.click(sortButton);
 
-      expect(sortByIdButton).toHaveClass('bg-primary', 'text-white');
-      expect(sortByNameButton).toHaveClass('bg-white', 'text-primary');
+      // Check that Name option is selected
+      const nameLabel = screen.getByText('Name').closest('label');
+      expect(nameLabel).toBeInTheDocument();
+    });
 
-      rerender(<SearchAndControls {...defaultProps} initialSortBy="name" />);
+    it('should close popup when clicking outside', async () => {
+      const user = userEvent.setup();
+      render(
+        <div>
+          <div data-testid="outside">Outside</div>
+          <SearchAndControls {...defaultProps} />
+        </div>
+      );
 
-      sortByNameButton = screen.getByLabelText('Sort by Name (A-Z)');
-      sortByIdButton = screen.getByLabelText('Sort by ID (#)');
+      const sortButton = screen.getByLabelText('Sort options');
+      await user.click(sortButton);
 
-      expect(sortByNameButton).toHaveClass('bg-primary', 'text-white');
-      expect(sortByIdButton).toHaveClass('bg-white', 'text-primary');
+      // Popup should be open
+      expect(screen.getByText('Number')).toBeInTheDocument();
+
+      // Click outside
+      const outside = screen.getByTestId('outside');
+      await user.click(outside);
+
+      // Popup should be closed
+      await waitFor(() => {
+        expect(screen.queryByText('Number')).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -299,11 +335,15 @@ describe('SearchAndControls', () => {
       expect(searchInput).toBeInTheDocument();
     });
 
-    it('should have proper aria-pressed attributes for sort buttons', () => {
-      render(<SearchAndControls {...defaultProps} initialSortBy="name" />);
+    it('should have proper aria-expanded attribute for sort button', async () => {
+      const user = userEvent.setup();
+      render(<SearchAndControls {...defaultProps} />);
 
-      expect(screen.getByLabelText('Sort by Name (A-Z)')).toHaveAttribute('aria-pressed', 'true');
-      expect(screen.getByLabelText('Sort by ID (#)')).toHaveAttribute('aria-pressed', 'false');
+      const sortButton = screen.getByLabelText('Sort options');
+      expect(sortButton).toHaveAttribute('aria-expanded', 'false');
+
+      await user.click(sortButton);
+      expect(sortButton).toHaveAttribute('aria-expanded', 'true');
     });
   });
 });

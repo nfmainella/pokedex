@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { Icon } from '@/components/ui/Icon';
 
 /**
  * Props interface for SearchAndControls component
@@ -12,84 +13,56 @@ export interface SearchAndControlsProps {
   onSearchChange: (term: string) => void;
   /** The current active sort order */
   initialSortBy: 'name' | 'id';
-  /** Function to call when a sort button is clicked */
+  /** Function to call when a sort option is selected */
   onSortChange: (sort: 'name' | 'id') => void;
 }
 
 /**
- * Search Icon Component (Magnifying Glass)
+ * Search Icon Component (Magnifying Glass) - 16px
  */
 function SearchIcon() {
   return (
     <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="text-primary"
+      className="text-[#DC0A2D]"
     >
       <path
-        d="M9 17C13.4183 17 17 13.4183 17 9C17 4.58172 13.4183 1 9 1C4.58172 1 1 4.58172 1 9C1 13.4183 4.58172 17 9 17Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M19 19L14.65 14.65"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z"
+        fill="currentColor"
       />
     </svg>
   );
 }
 
 /**
- * Menu/Filter Icon Component (Three Horizontal Lines)
- * @param className - Optional className to control icon color
+ * Close/Clear Icon Component (X) - 16px
  */
-function MenuIcon({ className = 'text-primary' }: { className?: string }) {
+function CloseIcon() {
   return (
     <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
+      className="text-[#DC0A2D]"
     >
       <path
-        d="M3 5H17"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M3 10H17"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M3 15H17"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
+        fill="currentColor"
       />
     </svg>
   );
 }
 
 /**
- * Close/Clear Icon Component (X)
+ * Radio Button Checked Icon - 16px
  */
-function CloseIcon({ className = 'text-primary' }: { className?: string }) {
+function RadioButtonChecked() {
   return (
     <svg
       width="16"
@@ -97,22 +70,26 @@ function CloseIcon({ className = 'text-primary' }: { className?: string }) {
       viewBox="0 0 16 16"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
     >
-      <path
-        d="M12 4L4 12"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M4 4L12 12"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <circle cx="8" cy="8" r="7" stroke="#DC0A2D" strokeWidth="1" fill="white" />
+      <circle cx="8" cy="8" r="4" fill="#DC0A2D" />
+    </svg>
+  );
+}
+
+/**
+ * Radio Button Unchecked Icon - 16px
+ */
+function RadioButtonUnchecked() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="8" cy="8" r="7" stroke="#DC0A2D" strokeWidth="1" fill="white" />
     </svg>
   );
 }
@@ -122,8 +99,8 @@ function CloseIcon({ className = 'text-primary' }: { className?: string }) {
  * 
  * A client-side component that provides:
  * - A search input with 300ms debouncing
- * - Two sort buttons (Sort by Name A-Z, Sort by ID #)
- * - Active state styling for the selected sort option
+ * - A sort button that opens a popup with radio button options (Number/Name)
+ * - Proper styling matching the design specifications
  * 
  * The component integrates with parent state management to update
  * search and sort parameters that feed into the usePokemonQuery hook.
@@ -135,7 +112,10 @@ export function SearchAndControls({
   onSortChange,
 }: SearchAndControlsProps) {
   const [searchValue, setSearchValue] = useState(initialSearch);
+  const [isSortPopupOpen, setIsSortPopupOpen] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const sortButtonRef = useRef<HTMLButtonElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
 
   // Sync with parent when initialSearch changes externally
   useEffect(() => {
@@ -150,6 +130,28 @@ export function SearchAndControls({
       }
     };
   }, []);
+
+  // Handle click outside to close popup
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        popupRef.current &&
+        sortButtonRef.current &&
+        !popupRef.current.contains(event.target as Node) &&
+        !sortButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsSortPopupOpen(false);
+      }
+    };
+
+    if (isSortPopupOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSortPopupOpen]);
 
   /**
    * Handles search input changes with 300ms debouncing
@@ -169,10 +171,18 @@ export function SearchAndControls({
   };
 
   /**
-   * Handles sort button clicks
+   * Handles sort option selection
    */
-  const handleSortClick = (sort: 'name' | 'id') => {
+  const handleSortOptionClick = (sort: 'name' | 'id') => {
     onSortChange(sort);
+    setIsSortPopupOpen(false);
+  };
+
+  /**
+   * Handles sort button click - toggles popup
+   */
+  const handleSortButtonClick = () => {
+    setIsSortPopupOpen((prev) => !prev);
   };
 
   /**
@@ -190,63 +200,101 @@ export function SearchAndControls({
   };
 
   return (
-    <div className="bg-[#EFEFEF] rounded-xl p-20 flex flex-col gap-4">
+    <div className="flex flex-row items-center gap-4 w-full h-8">
       {/* Search Bar */}
-      <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2">
-          <SearchIcon />
+      <div className="relative flex-1 h-8">
+        <div className={`flex flex-row items-center h-full bg-white rounded-2xl ${
+          searchValue 
+            ? 'pl-3 pr-0 shadow-[0px_1px_3px_1px_rgba(0,0,0,0.2)]' 
+            : 'px-4 shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)]'
+        }`}>
+          {/* Search Icon */}
+          <div className="shrink-0">
+            <SearchIcon />
+          </div>
+
+          {/* Search Input */}
+          <input
+            type="text"
+            value={searchValue}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Search"
+            className="flex-1 h-4 px-2 text-[10px] leading-4 text-[#1D1D1D] placeholder:text-[#666666] bg-transparent border-none outline-none"
+            aria-label="Search Pokémon"
+          />
+
+          {/* Clear Button Frame (Frame 31) - shown when there's text */}
+          {searchValue && (
+            <div className="flex items-start justify-center py-2 pr-3 pl-2 w-9 h-8">
+              <button
+                type="button"
+                onClick={handleClear}
+                className="flex items-center justify-center hover:opacity-70 transition-opacity"
+                aria-label="Clear search"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+          )}
         </div>
-        {searchValue && (
-          <button
-            type="button"
-            onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 hover:opacity-70 transition-opacity"
-            aria-label="Clear search"
-          >
-            <CloseIcon />
-          </button>
-        )}
-        <input
-          type="text"
-          value={searchValue}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          placeholder="Search"
-          className="w-[200px] h-8 pl-10 pr-10 bg-white rounded-full border-none outline-none text-gray-900 placeholder:text-gray-600 shadow-inner-default focus:shadow-outer-active transition-shadow"
-          aria-label="Search Pokémon"
-        />
       </div>
 
-      {/* Sort Buttons */}
-      <div className="flex gap-3">
+      {/* Sort Button with Popup */}
+      <div className="relative shrink-0">
         <button
+          ref={sortButtonRef}
           type="button"
-          onClick={() => handleSortClick('name')}
-          className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 ${
-            initialSortBy === 'name'
-              ? 'bg-primary text-white shadow-outer-active'
-              : 'bg-white text-primary shadow-inner-default hover:shadow-outer-active'
-          }`}
-          aria-label="Sort by Name (A-Z)"
-          aria-pressed={initialSortBy === 'name'}
-          title="Sort by Name (A-Z)"
+          onClick={handleSortButtonClick}
+          className="flex items-start justify-center p-2 w-8 h-8 bg-white rounded-2xl shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)] hover:opacity-90 transition-opacity"
+          aria-label="Sort options"
+          aria-expanded={isSortPopupOpen}
         >
-          <MenuIcon className={initialSortBy === 'name' ? 'text-white' : 'text-primary'} />
+          <Icon 
+            name={initialSortBy === 'name' ? 'text_format' : 'tag'} 
+            size={16} 
+            color="#DC0A2D" 
+          />
         </button>
 
-        <button
-          type="button"
-          onClick={() => handleSortClick('id')}
-          className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 ${
-            initialSortBy === 'id'
-              ? 'bg-primary text-white shadow-outer-active'
-              : 'bg-white text-primary shadow-inner-default hover:shadow-outer-active'
-          }`}
-          aria-label="Sort by ID (#)"
-          aria-pressed={initialSortBy === 'id'}
-          title="Sort by ID (#)"
-        >
-          <MenuIcon className={initialSortBy === 'id' ? 'text-white' : 'text-primary'} />
-        </button>
+        {/* Sort Popup (Sort card) */}
+        {isSortPopupOpen && (
+          <div
+            ref={popupRef}
+            className="absolute top-full right-0 mt-2 flex flex-col items-start px-1 pb-1 w-[113px] h-[132px] bg-[#DC0A2D] border-l-4 border-[#DC0A2D] rounded-xl shadow-[0px_3px_12px_3px_rgba(0,0,0,0.2)] z-50"
+          >
+            {/* Frame 54 - Sort by label */}
+            <div className="flex flex-row items-start px-5 py-4 w-[105px] h-12">
+              <span className="text-xs font-bold leading-4 text-white">
+                Sort by:
+              </span>
+            </div>
+
+            {/* Frame 55 - Radio buttons */}
+            <div className="flex flex-col items-start px-5 py-4 gap-4 w-[105px] h-20 bg-white rounded-lg shadow-[inset_0px_1px_3px_1px_rgba(0,0,0,0.25)]">
+              {/* Radio Button: Number */}
+              <label
+                className="flex flex-row items-center gap-2 w-[65px] h-4 cursor-pointer"
+                onClick={() => handleSortOptionClick('id')}
+              >
+                <div className="shrink-0">
+                  {initialSortBy === 'id' ? <RadioButtonChecked /> : <RadioButtonUnchecked />}
+                </div>
+                <span className="text-[10px] leading-4 text-[#1D1D1D]">Number</span>
+              </label>
+
+              {/* Radio Button: Name */}
+              <label
+                className="flex flex-row items-center gap-2 w-[65px] h-4 cursor-pointer"
+                onClick={() => handleSortOptionClick('name')}
+              >
+                <div className="shrink-0">
+                  {initialSortBy === 'name' ? <RadioButtonChecked /> : <RadioButtonUnchecked />}
+                </div>
+                <span className="text-[10px] leading-4 text-[#1D1D1D]">Name</span>
+              </label>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

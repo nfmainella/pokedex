@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { usePokemonQuery, type UsePokemonQueryParams } from '@/hooks/usePokemonQuery';
+import { usePokemonQuery } from '@/hooks/usePokemonQuery';
+import { type PokemonQueryParams } from '@/lib/types';
 import { SearchAndControls } from '@/components/SearchAndControls';
 import { PokemonCard } from '@/components/PokemonCard';
 import { Icon } from '@/components/ui/Icon';
@@ -29,7 +30,6 @@ function transformPokemonListItem(item: { name: string; url: string }) {
     sprites: {
       front_default: spriteUrl,
     },
-    types: [], // Types not available in list endpoint, will be empty
   };
 }
 
@@ -52,12 +52,14 @@ export function PokedexListScreen() {
   const [offset, setOffset] = useState<number>(0);
   const [search, setSearch] = useState<string>('');
   const [sortBy, setSortBy] = useState<'name' | 'id'>('id');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
-  const queryParams: UsePokemonQueryParams = {
+  const queryParams: PokemonQueryParams = {
     limit,
     offset,
     search,
     sortBy,
+    sortDir,
   };
 
   const { data, isLoading, isError, error } = usePokemonQuery(queryParams);
@@ -133,9 +135,9 @@ export function PokedexListScreen() {
   return (
     <div className="w-[360px] h-[640px] bg-[#DC0A2D] p-1 flex flex-col isolate">
       {/* Header Section (Frame 29) */}
-      <div className="flex flex-col items-start px-3 pt-3 pb-6 gap-2 w-[352px] flex-none z-[2]">
+      <div className="flex flex-col items-start px-3 pt-3 pb-6 gap-2 w-[352px] h-[108px] flex-none z-[2]">
         {/* Title */}
-        <div className="flex flex-row items-center gap-4 w-full h-8">
+        <div className="flex flex-row items-center gap-4 w-[328px] h-8">
           <Icon name="pokeball" size={24} color="#FFFFFF" />
           <h1 className="text-2xl font-bold text-white leading-8">
             Pokédex
@@ -143,7 +145,7 @@ export function PokedexListScreen() {
         </div>
 
         {/* Filters (SearchAndControls) */}
-        <div className="w-full">
+        <div className="w-[328px] h-8">
           <SearchAndControls
             initialSearch={search}
             onSearchChange={handleSearchChange}

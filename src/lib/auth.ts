@@ -1,23 +1,14 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import jwt from 'jsonwebtoken';
 
 export interface AuthUser {
   username: string;
 }
 
-interface StatusResponse {
-  success: boolean;
-  user?: {
-    username: string;
-  };
-}
-
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
-
 /**
- * Verifies authentication by proxying to the backend /api/status endpoint
+ * Verifies authentication by validating the JWT token stored in cookies
  * Returns the user if authenticated, null otherwise
- * This uses the proxy approach - all auth logic stays in the backend
  */
 export async function verifyAuth(): Promise<AuthUser | null> {
   try {
@@ -28,29 +19,15 @@ export async function verifyAuth(): Promise<AuthUser | null> {
       return null;
     }
 
-    // Proxy the request to the backend
-    const response = await fetch(`${BACKEND_URL}/api/status`, {
-      method: 'GET',
-      headers: {
-        Cookie: `auth_token=${authToken}`,
-      },
-      credentials: 'include',
-      // Don't cache this request
-      cache: 'no-store',
-    });
+    // Verify the JWT token
+    const decoded = jwt.verify(
+      authToken,
+      process.env.JWT_SECRET || 'your-secret-key'
+    ) as { username: string };
 
-    if (!response.ok) {
-      return null;
-    }
-
-    const data: StatusResponse = await response.json();
-
-    if (data.success && data.user) {
-      return { username: data.user.username };
-    }
-
-    return null;
+    return { username: decoded.username };
   } catch (error) {
+    // Token is invalid or expired
     console.error('Error verifying auth:', error);
     return null;
   }

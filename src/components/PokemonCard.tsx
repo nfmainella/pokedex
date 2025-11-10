@@ -1,14 +1,9 @@
 'use client';
 
+import { useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-
-/**
- * Type definition for a Pokémon type
- */
-interface PokemonType {
-  name: string;
-}
+import { useQueryClient } from '@tanstack/react-query';
 
 /**
  * Type definition for Pokémon sprites
@@ -25,34 +20,8 @@ export interface PokemonCardProps {
     name: string;
     id: number;
     sprites: PokemonSprites;
-    types: PokemonType[];
   };
 }
-
-/**
- * Map of Pokémon type names to their corresponding hex colors
- * Based on the design system and Pokémon type color palette
- */
-const typeColors: Record<string, string> = {
-  normal: '#AA9999',
-  fighting: '#CC4444',
-  flying: '#9BB4E8',
-  ground: '#D4A574',
-  poison: '#A552CC',
-  rock: '#BBAA66',
-  bug: '#A8B820',
-  ghost: '#705898',
-  steel: '#B8B8D0',
-  fire: '#FF6600',
-  water: '#3399FF',
-  grass: '#8DD694',
-  electric: '#FFCC33',
-  psychic: '#F85888',
-  ice: '#66CCCC',
-  dragon: '#7038F8',
-  dark: '#705848',
-  fairy: '#EE99AC',
-};
 
 /**
  * Formats the Pokémon ID as a zero-padded string (e.g., 1 -> "001")
@@ -70,65 +39,77 @@ function capitalize(str: string): string {
 
 /**
  * PokemonCard Component
- * 
+ *
  * A reusable client-side component that displays a Pokémon card with:
- * - Pokémon ID/number
- * - Pokémon name
- * - Pokémon image
- * - Type badges with appropriate colors
- * 
+ * - Pokémon ID/number (top right)
+ * - Pokémon name (bottom, on light gray background)
+ * - Pokémon image (centered, overlapping number and name sections)
+ *
+ * Performance Optimization:
+ * - Implements prefetch on hover: When the user hovers over a card, the component
+ *   automatically prefetches the Pokémon detail data using TanStack Query's
+ *   prefetchQuery method, minimizing perceived latency when navigating to details
+ *
+ * The card matches the design specifications:
+ * - Fixed dimensions: 104px × 108px
+ * - Number section: 8px font, right-aligned, #666666
+ * - Name section: 10px font, centered, #1D1D1D on #EFEFEF background
+ * - Image: 72px × 72px, absolutely positioned
+ *
  * The card is wrapped in a Next.js Link component for navigation to the detail view.
  */
 export function PokemonCard({ pokemon }: PokemonCardProps) {
   const formattedId = formatPokemonId(pokemon.id);
   const capitalizedName = capitalize(pokemon.name);
+  const queryClient = useQueryClient();
+
+  /**
+   * Prefetch the Pokémon detail data when hovering over the card
+   * This minimizes perceived latency when the user navigates to the details page
+   */
+  const handleMouseEnter = useCallback(() => {
+    queryClient.prefetchQuery({
+      queryKey: ['pokemon', pokemon.id],
+      queryFn: async () => {
+        const response = await fetch(`/api/pokemon/${pokemon.id}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch Pokémon detail: ${response.statusText}`);
+        }
+        return response.json();
+      },
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    });
+  }, [queryClient, pokemon.id]);
 
   return (
     <Link
       href={`/pokemon/${pokemon.id}`}
-      className="group relative block bg-white rounded-xl shadow-card-sm transition-all duration-200 hover:scale-105 hover:shadow-card-lg"
+      className="relative block w-[104px] h-[108px] bg-white rounded-lg shadow-[0px_1px_3px_1px_rgba(0,0,0,0.2)] isolate hover:shadow-[0px_2px_6px_2px_rgba(0,0,0,0.3)] transition-shadow"
+      onMouseEnter={handleMouseEnter}
     >
-      <div className="p-4 flex flex-col items-center gap-3">
-        {/* ID/Number */}
-        <div className="w-full flex justify-end">
-          <span className="text-sm font-bold text-gray-600">
-            {formattedId}
-          </span>
-        </div>
+      {/* Number Section - Top */}
+      <div className="flex flex-row justify-end items-start pt-1 px-2 gap-2 w-[104px] h-4 z-0">
+        <span className="text-[8px] leading-3 text-[#666666] text-right">
+          {formattedId}
+        </span>
+      </div>
 
-        {/* Pokémon Image */}
-        <div className="flex items-center justify-center">
-          <Image
-            src={pokemon.sprites.front_default}
-            alt={capitalizedName}
-            width={96}
-            height={96}
-            className="object-contain"
-          />
-        </div>
-
-        {/* Name */}
-        <h3 className="text-lg font-bold text-gray-900">
+      {/* Name Section - Bottom */}
+      <div className="absolute bottom-0 left-0 right-0 flex flex-row items-start pt-6 px-2 pb-1 w-[104px] h-11 bg-[#EFEFEF] rounded-[7px] z-10">
+        <span className="w-[88px] h-4 text-[10px] leading-4 text-[#1D1D1D] text-center">
           {capitalizedName}
-        </h3>
+        </span>
+      </div>
 
-        {/* Type Badges */}
-        <div className="flex flex-wrap gap-2 justify-center">
-          {pokemon.types.map((type) => {
-            const typeName = type.name.toLowerCase();
-            const backgroundColor = typeColors[typeName] || typeColors.normal;
-            
-            return (
-              <span
-                key={type.name}
-                className="px-3 py-1 rounded-full text-xs font-medium text-white"
-                style={{ backgroundColor }}
-              >
-                {capitalize(type.name)}
-              </span>
-            );
-          })}
-        </div>
+      {/* Pokémon Image - Centered, Overlapping */}
+      <div className="absolute left-4 top-4 w-[72px] h-[72px] z-20">
+        <Image
+          src={pokemon.sprites.front_default}
+          alt={capitalizedName}
+          width={72}
+          height={72}
+          className="object-contain"
+        />
       </div>
     </Link>
   );

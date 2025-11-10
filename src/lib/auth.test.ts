@@ -1,6 +1,7 @@
 import { verifyAuth, requireAuth } from './auth';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import jwt from 'jsonwebtoken';
 
 // Mock next/headers
 jest.mock('next/headers', () => ({
@@ -12,21 +13,23 @@ jest.mock('next/navigation', () => ({
   redirect: jest.fn(),
 }));
 
-// Mock fetch
-global.fetch = jest.fn();
+// Mock jsonwebtoken
+jest.mock('jsonwebtoken', () => ({
+  verify: jest.fn(),
+}));
 
 const mockCookies = cookies as jest.MockedFunction<typeof cookies>;
 const mockRedirect = redirect as jest.MockedFunction<typeof redirect>;
-const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;
+const mockVerify = jwt.verify as jest.MockedFunction<typeof jwt.verify>;
 
 describe('auth utilities', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.BACKEND_URL = 'http://localhost:3001';
+    process.env.JWT_SECRET = 'test-secret-key';
   });
 
   afterEach(() => {
-    delete process.env.BACKEND_URL;
+    delete process.env.JWT_SECRET;
   });
 
   describe('verifyAuth', () => {
@@ -38,7 +41,7 @@ describe('auth utilities', () => {
       const result = await verifyAuth();
 
       expect(result).toBeNull();
-      expect(mockFetch).not.toHaveBeenCalled();
+      expect(mockVerify).not.toHaveBeenCalled();
     });
 
     it('should return user when token is valid', async () => {
@@ -52,29 +55,18 @@ describe('auth utilities', () => {
         }),
       } as any);
 
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          success: true,
-          user: { username: 'admin' },
-        }),
-      } as Response);
+      mockVerify.mockReturnValue({ username: 'admin' } as any);
 
       const result = await verifyAuth();
 
       expect(result).toEqual({ username: 'admin' });
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/status',
-        expect.objectContaining({
-          method: 'GET',
-          headers: expect.objectContaining({
-            Cookie: `auth_token=${mockToken}`,
-          }),
-        })
+      expect(mockVerify).toHaveBeenCalledWith(
+        mockToken,
+        'test-secret-key'
       );
     });
 
-    it('should return null when backend returns error', async () => {
+    it('should return null when token verification fails', async () => {
       const mockToken = 'invalid-token';
       mockCookies.mockResolvedValue({
         get: jest.fn((name: string) => {
@@ -85,18 +77,17 @@ describe('auth utilities', () => {
         }),
       } as any);
 
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 401,
-      } as Response);
+      mockVerify.mockImplementation(() => {
+        throw new Error('Invalid token');
+      });
 
       const result = await verifyAuth();
 
       expect(result).toBeNull();
     });
 
-    it('should return null when backend returns success: false', async () => {
-      const mockToken = 'token';
+    it('should return null when token is expired', async () => {
+      const mockToken = 'expired-token';
       mockCookies.mockResolvedValue({
         get: jest.fn((name: string) => {
           if (name === 'auth_token') {
@@ -106,30 +97,9 @@ describe('auth utilities', () => {
         }),
       } as any);
 
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          success: false,
-        }),
-      } as Response);
-
-      const result = await verifyAuth();
-
-      expect(result).toBeNull();
-    });
-
-    it('should return null when fetch throws an error', async () => {
-      const mockToken = 'token';
-      mockCookies.mockResolvedValue({
-        get: jest.fn((name: string) => {
-          if (name === 'auth_token') {
-            return { value: mockToken };
-          }
-          return undefined;
-        }),
-      } as any);
-
-      mockFetch.mockRejectedValue(new Error('Network error'));
+      mockVerify.mockImplementation(() => {
+        throw new Error('jwt expired');
+      });
 
       const result = await verifyAuth();
 
@@ -149,13 +119,7 @@ describe('auth utilities', () => {
         }),
       } as any);
 
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          success: true,
-          user: { username: 'admin' },
-        }),
-      } as Response);
+      mockVerify.mockReturnValue({ username: 'admin' } as any);
 
       const result = await requireAuth();
 
@@ -173,7 +137,7 @@ describe('auth utilities', () => {
       expect(mockRedirect).toHaveBeenCalledWith('/login');
     });
 
-    it('should redirect to login when backend returns error', async () => {
+    it('should redirect to login when token verification fails', async () => {
       const mockToken = 'invalid-token';
       mockCookies.mockResolvedValue({
         get: jest.fn((name: string) => {
@@ -184,10 +148,9 @@ describe('auth utilities', () => {
         }),
       } as any);
 
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 401,
-      } as Response);
+      mockVerify.mockImplementation(() => {
+        throw new Error('Invalid token');
+      });
 
       await requireAuth();
 

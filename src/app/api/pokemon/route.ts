@@ -1,61 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+import { fetchPokemonList } from '@/lib/pokemonService';
 
 /**
- * Proxy route for /api/pokemon
- * Forwards the request to the backend with cookies and query parameters
+ * GET /api/pokemon
+ * Fetches a paginated and sorted list of Pokémon
+ *
+ * Query Parameters:
+ * - limit: Number of items per page (default: 20)
+ * - offset: Starting index (default: 0)
+ * - sortBy: 'name' or 'id' (default: 'id')
+ * - sortDir: 'asc' or 'desc' (default: 'asc')
+ * - search: Optional search query to filter by name
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get all cookies from the request
-    const cookieHeader = request.headers.get('cookie') || '';
-
     // Get query parameters from the request
     const { searchParams } = new URL(request.url);
-    const limit = searchParams.get('limit');
-    const offset = searchParams.get('offset');
-    const search = searchParams.get('search');
-    const sortBy = searchParams.get('sortBy');
 
-    // Build query string for backend
-    const queryParams = new URLSearchParams();
-    if (limit) queryParams.set('limit', limit);
-    if (offset) queryParams.set('offset', offset);
-    if (search) queryParams.set('search', search);
-    if (sortBy) queryParams.set('sortBy', sortBy);
-
-    const queryString = queryParams.toString();
-    const backendUrl = `${BACKEND_URL}/api/pokemon${queryString ? `?${queryString}` : ''}`;
-
-    // Forward the request to the backend
-    const response = await fetch(backendUrl, {
-      method: 'GET',
-      headers: {
-        Cookie: cookieHeader,
-      },
-      credentials: 'include',
-    });
-
-    const data = await response.json();
-
-    // Create a new response with the backend's data
-    const nextResponse = NextResponse.json(data, {
-      status: response.status,
-    });
-
-    // Forward any Set-Cookie headers from the backend
-    response.headers.forEach((value, key) => {
-      if (key.toLowerCase() === 'set-cookie') {
-        nextResponse.headers.append('set-cookie', value);
+    // Parse and validate limit
+    let limit = 20; // default
+    const limitParam = searchParams.get('limit');
+    if (limitParam) {
+      const parsedLimit = parseInt(limitParam, 10);
+      if (isNaN(parsedLimit) || parsedLimit <= 0) {
+        return NextResponse.json(
+          { error: 'Invalid limit parameter. Must be a positive number.' },
+          { status: 400 }
+        );
       }
-    });
+      limit = parsedLimit;
+    }
 
-    return nextResponse;
+    // Parse and validate offset
+    let offset = 0; // default
+    const offsetParam = searchParams.get('offset');
+    if (offsetParam) {
+      const parsedOffset = parseInt(offsetParam, 10);
+      if (isNaN(parsedOffset) || parsedOffset < 0) {
+        return NextResponse.json(
+          { error: 'Invalid offset parameter. Must be a non-negative number.' },
+          { status: 400 }
+        );
+      }
+      offset = parsedOffset;
+    }
+
+    // Parse sortBy parameter
+    const sortByParam = searchParams.get('sortBy');
+    const sortBy: 'name' | 'id' = sortByParam === 'name' ? 'name' : 'id';
+
+    // Parse sortDir parameter
+    const sortDirParam = searchParams.get('sortDir');
+    const sortDir: 'asc' | 'desc' = sortDirParam === 'desc' ? 'desc' : 'asc';
+
+    // Parse search parameter
+    const search = searchParams.get('search') || '';
+
+    // Fetch paginated, sorted, and optionally searched Pokemon list
+    const pokemonData = await fetchPokemonList(limit, offset, sortBy, sortDir, search);
+
+    return NextResponse.json(pokemonData);
   } catch (error) {
-    console.error('Error proxying pokemon request:', error);
+    console.error('Error fetching Pokemon list:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to fetch Pokemon list' },
       { status: 500 }
     );
   }

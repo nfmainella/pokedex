@@ -2,43 +2,17 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { pokemonHttpClient } from '@/lib/httpClient';
-
-/**
- * Parameters for the usePokemonQuery hook
- */
-export interface UsePokemonQueryParams {
-  /** Number of items per page (Pagination) */
-  limit?: number;
-  /** Starting point in the list (Pagination) */
-  offset?: number;
-  /** Used for filtering Pokémon by name */
-  search?: string;
-  /** Used for sorting the results */
-  sortBy?: 'name' | 'id';
-}
-
-/**
- * Response structure from the Pokémon API endpoint
- */
-export interface PokemonListResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: Array<{
-    name: string;
-    url: string;
-  }>;
-}
+import { PokemonListResponse, PokemonQueryParams } from '@/lib/types';
 
 /**
  * Custom hook for fetching paginated and sorted list of Pokémon
- * 
+ *
  * Uses TanStack Query to manage data fetching, caching, and state.
  * Automatically includes authentication cookies via httpClient configuration.
- * 
+ *
  * @param params - Query parameters for pagination, search, and sorting
  * @returns Standard useQuery object with data, isLoading, isError, isFetching, etc.
- * 
+ *
  * @example
  * ```tsx
  * const { data, isLoading, isError } = usePokemonQuery({
@@ -49,20 +23,21 @@ export interface PokemonListResponse {
  * });
  * ```
  */
-export function usePokemonQuery(params: UsePokemonQueryParams = {}) {
+export function usePokemonQuery(params: PokemonQueryParams = {}) {
   const {
     limit = 20,
     offset = 0,
     search = '',
     sortBy = 'id',
+    sortDir = 'asc',
   } = params;
 
   return useQuery<PokemonListResponse>({
-    queryKey: ['pokemonList', { limit, offset, search, sortBy }],
+    queryKey: ['pokemonList', { limit, offset, search, sortBy, sortDir }],
     queryFn: async () => {
       // Build query parameters
       const queryParams = new URLSearchParams();
-      
+
       if (limit !== undefined) {
         queryParams.set('limit', limit.toString());
       }
@@ -74,6 +49,9 @@ export function usePokemonQuery(params: UsePokemonQueryParams = {}) {
       }
       if (sortBy) {
         queryParams.set('sortBy', sortBy);
+      }
+      if (sortDir) {
+        queryParams.set('sortDir', sortDir);
       }
 
       const queryString = queryParams.toString();

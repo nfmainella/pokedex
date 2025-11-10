@@ -1,15 +1,20 @@
 import axios from 'axios';
 
-// Use Next.js API routes as proxy instead of direct backend calls
-// This keeps all auth logic in the backend
+/**
+ * HTTP client for authentication endpoints
+ * Automatically includes cookies for auth token
+ */
 export const httpClient = axios.create({
-  baseURL: '/api/auth', // Proxy through Next.js API routes
+  baseURL: '/api/auth',
   withCredentials: true,
 });
 
-// Pokemon API client - proxies through Next.js API routes
+/**
+ * HTTP client for Pokemon API endpoints
+ * Automatically includes cookies for auth token verification via middleware
+ */
 export const pokemonHttpClient = axios.create({
-  baseURL: '/api/pokemon', // Proxy through Next.js API routes
+  baseURL: '/api/pokemon',
   withCredentials: true,
 });
 

@@ -76,7 +76,7 @@ describe('usePokemonQuery', () => {
       });
 
       // Verify the API was called with correct parameters
-      expect(mockPokemonHttpClient.get).toHaveBeenCalledWith('?limit=20&offset=0&sortBy=id');
+      expect(mockPokemonHttpClient.get).toHaveBeenCalledWith('?limit=20&offset=0&sortBy=id&sortDir=asc');
 
       // After successful response
       expect(result.current.isLoading).toBe(false);
@@ -113,7 +113,7 @@ describe('usePokemonQuery', () => {
 
       // Verify the API was called with correct parameters
       expect(mockPokemonHttpClient.get).toHaveBeenCalledWith(
-        '?limit=10&offset=20&search=pikachu&sortBy=name'
+        '?limit=10&offset=20&search=pikachu&sortBy=name&sortDir=asc'
       );
 
       expect(result.current.data).toEqual(mockPokemonResponse);
@@ -175,7 +175,7 @@ describe('usePokemonQuery', () => {
       });
 
       // Empty search should not be included in query params
-      expect(mockPokemonHttpClient.get).toHaveBeenCalledWith('?limit=20&offset=0&sortBy=id');
+      expect(mockPokemonHttpClient.get).toHaveBeenCalledWith('?limit=20&offset=0&sortBy=id&sortDir=asc');
       expect(result.current.data).toEqual(mockPokemonResponse);
     });
 
@@ -200,7 +200,7 @@ describe('usePokemonQuery', () => {
       });
 
       // Should use default values
-      expect(mockPokemonHttpClient.get).toHaveBeenCalledWith('?limit=20&offset=0&sortBy=id');
+      expect(mockPokemonHttpClient.get).toHaveBeenCalledWith('?limit=20&offset=0&sortBy=id&sortDir=asc');
       expect(result.current.data).toEqual(mockPokemonResponse);
     });
   });
