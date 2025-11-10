@@ -4,6 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth';
 import statusRoutes from './routes/status';
+import pokemonRoutes from './routes/pokemon';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use(
 // Routes
 app.use('/api', authRoutes);
 app.use('/api', statusRoutes);
+app.use('/api', pokemonRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
