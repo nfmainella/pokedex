@@ -7,3 +7,9 @@ export const httpClient = axios.create({
   withCredentials: true,
 });
 
+// Pokemon API client - proxies through Next.js API routes
+export const pokemonHttpClient = axios.create({
+  baseURL: '/api/pokemon', // Proxy through Next.js API routes
+  withCredentials: true,
+});
+
