@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { getTypeColor, getPrimaryTypeColor, getTypeColors } from '@/lib/pokemonTypes';
+import { getPrimaryTypeColor, getTypeColors } from '@/lib/pokemonTypes';
 import type { PokemonType as ApiPokemonType } from '@/lib/types';
 
 /**

@@ -1,18 +1,18 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { usePokemonQuery } from './usePokemonQuery';
-import type { PokemonListResponse } from './usePokemonQuery';
-import { pokemonHttpClient } from '@/lib/httpClient';
+import type { PokemonListResponse } from '@/lib/types';
+import { httpClient } from '@/lib/httpClient';
 import React from 'react';
 
 // Mock the pokemonHttpClient
 jest.mock('@/lib/httpClient', () => ({
-  pokemonHttpClient: {
+  httpClient: {
     get: jest.fn(),
   },
 }));
 
-const mockPokemonHttpClient = pokemonHttpClient as jest.Mocked<typeof pokemonHttpClient>;
+const mockPokemonHttpClient = httpClient as jest.Mocked<typeof httpClient>;
 
 // Create a wrapper component for React Query
 const createWrapper = () => {

@@ -23,6 +23,10 @@ export default defineConfig({
         primary: {
           DEFAULT: "#DC0A2D",
         },
+        white: "#FFFFFF",
+        "text-dark": "#1D1D1D",
+        "text-muted": "#999999",
+        "background-light": "#F5F5F5",
         gray: {
           300: "#E0E0E0",
           600: "#5E5E5E",
@@ -54,6 +58,7 @@ export default defineConfig({
         "card-lg": "0.20px 4px 8px rgba(0, 0, 0, 0.2)",
         "inner-default": "inset 0px 1px 3px 1px rgba(0, 0, 0, 0.25)",
         "outer-active": "0px 1px 3px 1px rgba(0, 0, 0, 0.2)",
+        "card-hover": "0px 2px 6px 2px rgba(0, 0, 0, 0.3)",
       },
     },
   },

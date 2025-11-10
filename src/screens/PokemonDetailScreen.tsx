@@ -21,7 +21,7 @@ export function PokemonDetailScreen({ id }: { id: number | string }) {
       <div className="flex flex-col items-start p-1 relative bg-gray-300">
         <div className="flex items-center justify-center w-full h-full">
           <div className="animate-spin">
-            <Icon name="pokeball" size={48} color="#666666" />
+            <Icon name="pokeball" size={48} color="rgb(102, 102, 102)" />
           </div>
         </div>
       </div>
@@ -36,7 +36,7 @@ export function PokemonDetailScreen({ id }: { id: number | string }) {
           <p className="text-gray-600">Error loading Pokémon</p>
           <button
             onClick={() => router.back()}
-            className="px-4 py-2 bg-[#DC0A2D] text-white rounded-lg"
+            className="px-4 py-2 bg-primary text-white rounded-lg"
           >
             Go Back
           </button>
@@ -78,7 +78,7 @@ export function PokemonDetailScreen({ id }: { id: number | string }) {
           className="w-8 h-8 flex items-center justify-center shrink-0"
           aria-label="Go Home"
         >
-          <Icon name="arrow_back" size={32} color="#FFFFFF" />
+          <Icon name="arrow_back" size={32} color="rgb(255, 255, 255)" />
         </button>
 
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-8 sm:leading-10 flex items-center grow min-w-0 truncate">
@@ -98,7 +98,7 @@ export function PokemonDetailScreen({ id }: { id: number | string }) {
           className="w-6 h-6 flex items-center justify-center shrink-0 z-10 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-80 transition-opacity"
           aria-label="Previous Pokémon"
         >
-          <Icon name="chevron_left" size={24} color="#FFFFFF" />
+          <Icon name="chevron_left" size={24} color="rgb(255, 255, 255)" />
         </button>
 
         <div className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2 z-30 flex items-center justify-center w-50 h-50 aspect-square">
@@ -117,7 +117,7 @@ export function PokemonDetailScreen({ id }: { id: number | string }) {
           className="w-6 h-6 flex items-center justify-center shrink-0 z-10 hover:opacity-80 transition-opacity"
           aria-label="Next Pokémon"
         >
-          <Icon name="chevron_right" size={24} color="#FFFFFF" />
+          <Icon name="chevron_right" size={24} color="rgb(255, 255, 255)" />
         </button>
       </div>
 
@@ -151,7 +151,7 @@ export function PokemonDetailScreen({ id }: { id: number | string }) {
             {/* Weight */}
             <div className="flex flex-col items-center gap-1 sm:gap-2 grow min-w-0">
               <div className="flex flex-row justify-center items-center py-1 sm:py-2 gap-2 w-full flex-none">
-                <Icon name="weight" size={18} color="#1D1D1D" />
+                <Icon name="weight" size={18} color="rgb(29, 29, 29)" />
                 <span className="text-xs sm:text-sm leading-5 sm:leading-6 text-text-dark text-justify">
                   {pokemon.weight}
                 </span>
@@ -166,7 +166,7 @@ export function PokemonDetailScreen({ id }: { id: number | string }) {
             {/* Height */}
             <div className="flex flex-col items-center gap-1 sm:gap-2 grow min-w-0">
               <div className="flex flex-row justify-center items-center py-1 sm:py-2 gap-2 w-full flex-none">
-                <Icon name="straighten" size={18} color="#1D1D1D" />
+                <Icon name="straighten" size={18} color="rgb(29, 29, 29)" />
                 <span className="text-xs sm:text-sm leading-5 sm:leading-6 text-text-dark text-justify">
                   {pokemon.height}
                 </span>
@@ -266,7 +266,7 @@ export function PokemonDetailScreen({ id }: { id: number | string }) {
 
       {/* Pokeball Background Decoration */}
       <div className="absolute right-2 top-2 w-[208px] h-[208px] opacity-10 z-0">
-        <Icon name="pokeball" size={208} color="#FFFFFF" />
+        <Icon name="pokeball" size={208} color="rgb(255, 255, 255)" />
       </div>
     </div>
   );

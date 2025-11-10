@@ -13,30 +13,6 @@ export interface PokemonCardProps {
   pokemon: FormattedPokemonListItem;
 }
 
-/**
- * PokemonCard Component
- *
- * A reusable client-side component that displays a Pokémon card with:
- * - Pokémon ID/number (top right)
- * - Pokémon name (bottom, on light gray background)
- * - Pokémon image (centered, overlapping number and name sections)
- *
- * All data comes pre-formatted from the backend, so this component
- * focuses purely on rendering without any data transformations.
- *
- * Performance Optimization:
- * - Implements prefetch on hover: When the user hovers over a card, the component
- *   automatically prefetches the Pokémon detail data using TanStack Query's
- *   prefetchQuery method, minimizing perceived latency when navigating to details
- *
- * The card matches the design specifications:
- * - Fixed dimensions: 104px × 108px
- * - Number section: 8px font, right-aligned, #666666
- * - Name section: 10px font, centered, #1D1D1D on #EFEFEF background
- * - Image: 72px × 72px, absolutely positioned
- *
- * The card is wrapped in a Next.js Link component for navigation to the detail view.
- */
 export function PokemonCard({ pokemon }: PokemonCardProps) {
   const queryClient = useQueryClient();
 
@@ -61,7 +37,7 @@ export function PokemonCard({ pokemon }: PokemonCardProps) {
   return (
     <Link
       href={`/pokemon/${pokemon.id}`}
-      className="relative block bg-white rounded-lg shadow-[0px_1px_3px_1px_rgba(0,0,0,0.2)] isolate hover:shadow-[0px_2px_6px_2px_rgba(0,0,0,0.3)] transition-shadow w-full aspect-[1/1.25]"
+      className="relative block bg-white rounded-lg shadow-outer-active isolate hover:shadow-card-hover transition-shadow w-full aspect-[1/1.25]"
       onMouseEnter={handleMouseEnter}
     >
       {/* Number Section - Top */}

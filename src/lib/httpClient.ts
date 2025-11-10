@@ -11,7 +11,7 @@ export const httpClient = axios.create({
 
 /**
  * HTTP client for Pokemon API endpoints
- * Automatically includes cookies for auth token verification via middleware
+ * Automatically includes cookies for auth token verification
  */
 export const pokemonHttpClient = axios.create({
   baseURL: '/api/pokemon',
