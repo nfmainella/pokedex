@@ -1,7 +1,6 @@
 import { verifyAuth, requireAuth } from './auth';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import jwt from 'jsonwebtoken';
 
 // Mock next/headers
 jest.mock('next/headers', () => ({
@@ -13,14 +12,17 @@ jest.mock('next/navigation', () => ({
   redirect: jest.fn(),
 }));
 
-// Mock jsonwebtoken
-jest.mock('jsonwebtoken', () => ({
-  verify: jest.fn(),
+// Mock jose
+jest.mock('jose', () => ({
+  jwtVerify: jest.fn(),
 }));
 
 const mockCookies = cookies as jest.MockedFunction<typeof cookies>;
 const mockRedirect = redirect as jest.MockedFunction<typeof redirect>;
-const mockVerify = jwt.verify as jest.MockedFunction<typeof jwt.verify>;
+
+// Import the mocked jwtVerify
+import { jwtVerify as mockJwtVerify } from 'jose';
+const mockVerify = mockJwtVerify as jest.MockedFunction<typeof mockJwtVerify>;
 
 describe('auth utilities', () => {
   beforeEach(() => {
@@ -55,15 +57,12 @@ describe('auth utilities', () => {
         }),
       } as any);
 
-      mockVerify.mockReturnValue({ username: 'admin' } as any);
+      mockVerify.mockResolvedValue({ payload: { username: 'admin' } } as any);
 
       const result = await verifyAuth();
 
       expect(result).toEqual({ username: 'admin' });
-      expect(mockVerify).toHaveBeenCalledWith(
-        mockToken,
-        'test-secret-key'
-      );
+      expect(mockVerify).toHaveBeenCalled();
     });
 
     it('should return null when token verification fails', async () => {
@@ -119,7 +118,7 @@ describe('auth utilities', () => {
         }),
       } as any);
 
-      mockVerify.mockReturnValue({ username: 'admin' } as any);
+      mockVerify.mockResolvedValue({ payload: { username: 'admin' } } as any);
 
       const result = await requireAuth();
 

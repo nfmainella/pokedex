@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { SignJWT } from 'jose';
 
 /**
  * POST /api/auth/login
@@ -18,12 +18,14 @@ export async function POST(request: NextRequest) {
 
     // Validate credentials (hardcoded for this exercise: admin/admin)
     if (username === 'admin' && password === 'admin') {
-      // Generate JWT token
-      const token = jwt.sign(
-        { username: 'admin' },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '24h' }
+      // Generate JWT token using jose
+      const secret = new TextEncoder().encode(
+        process.env.JWT_SECRET || 'your-secret-key'
       );
+      const token = await new SignJWT({ username: 'admin' })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setExpirationTime('24h')
+        .sign(secret);
 
       // Create response
       const response = NextResponse.json({ message: 'Login successful' });
@@ -32,7 +34,7 @@ export async function POST(request: NextRequest) {
       response.cookies.set('auth_token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
         maxAge: 24 * 60 * 60, // 24 hours in seconds
         path: '/',
       });

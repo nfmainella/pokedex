@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 
 /**
  * GET /api/auth/status
@@ -15,15 +15,15 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      // Verify the JWT token
-      const decoded = jwt.verify(
-        token,
+      // Verify the JWT token using jose
+      const secret = new TextEncoder().encode(
         process.env.JWT_SECRET || 'your-secret-key'
-      ) as { username: string };
+      );
+      const decoded = await jwtVerify(token, secret);
 
       return NextResponse.json({
         success: true,
-        username: decoded.username,
+        username: (decoded.payload as { username: string }).username,
       });
     } catch {
       // Token is invalid or expired

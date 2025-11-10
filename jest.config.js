@@ -22,7 +22,7 @@ const customJestConfig = {
     '!src/**/__tests__/**',
   ],
   transformIgnorePatterns: [
-    'node_modules/(?!(msw|@bundled-es-modules|@mswjs|until-async|@mswjs/interceptors|@mswjs/core)/)',
+    'node_modules/(?!(msw|@bundled-es-modules|@mswjs|until-async|@mswjs/interceptors|@mswjs/core|jose)/)',
   ],
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
 };

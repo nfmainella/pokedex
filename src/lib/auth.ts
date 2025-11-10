@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 
 export interface AuthUser {
   username: string;
@@ -19,13 +19,13 @@ export async function verifyAuth(): Promise<AuthUser | null> {
       return null;
     }
 
-    // Verify the JWT token
-    const decoded = jwt.verify(
-      authToken,
+    // Verify the JWT token using jose
+    const secret = new TextEncoder().encode(
       process.env.JWT_SECRET || 'your-secret-key'
-    ) as { username: string };
+    );
+    const decoded = await jwtVerify(authToken, secret);
 
-    return { username: decoded.username };
+    return { username: (decoded.payload as { username: string }).username };
   } catch (error) {
     // Token is invalid or expired
     console.error('Error verifying auth:', error);

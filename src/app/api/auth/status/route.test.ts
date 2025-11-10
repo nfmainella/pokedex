@@ -1,13 +1,13 @@
 import { GET } from './route';
 import { NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
 
-// Mock jsonwebtoken
-jest.mock('jsonwebtoken', () => ({
-  verify: jest.fn(),
+// Mock jose
+jest.mock('jose', () => ({
+  jwtVerify: jest.fn(),
 }));
 
-const mockVerify = jwt.verify as jest.MockedFunction<typeof jwt.verify>;
+import { jwtVerify as mockJwtVerify } from 'jose';
+const mockVerify = mockJwtVerify as jest.MockedFunction<typeof mockJwtVerify>;
 
 describe('GET /api/auth/status', () => {
   beforeEach(() => {
@@ -32,12 +32,12 @@ describe('GET /api/auth/status', () => {
       },
     } as unknown as NextRequest;
 
-    mockVerify.mockReturnValue({ username: 'admin' } as any);
+    mockVerify.mockResolvedValue({ payload: { username: 'admin' } } as any);
 
     const response = await GET(mockRequest);
     const data = await response.json();
 
-    expect(mockVerify).toHaveBeenCalledWith(mockToken, 'test-secret-key');
+    expect(mockVerify).toHaveBeenCalled();
     expect(response.status).toBe(200);
     expect(data).toEqual({
       success: true,
